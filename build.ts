@@ -22,7 +22,7 @@ try {
 
 	await fs.cp("./src/index.html", "./dist/index.html");
 	await fs.cp("./src/index.css", "./dist/index.css");
-	//await fs.cp("./src/_headers", "./dist/_headers");
+	await fs.cp("./src/_headers", "./dist/_headers");
 	await fs.cp("./src/logo.svg", "./dist/logo.svg");
 
 	console.log("🎉 Build complete! Output in ./dist");
