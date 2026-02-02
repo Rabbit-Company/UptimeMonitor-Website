@@ -1,0 +1,17 @@
+{
+	"name": "uptimemonitor-website",
+	"module": "src/index.js",
+	"version": "0.1.0",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"build": "bun run build.ts"
+	},
+	"devDependencies": {
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5.9.3"
+	},
+	"dependencies": {}
+}

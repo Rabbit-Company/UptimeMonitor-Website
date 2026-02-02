@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Uptime Monitor - Self-Hosted Infrastructure Monitoring</title>
+		<meta
+			name="description"
+			content="Open-source, self-hosted uptime monitoring with real-time WebSocket updates, beautiful status pages, and multi-region support. Monitor HTTP, TCP, databases, and more."
+		/>
+		<meta name="keywords" content="uptime monitor, status page, self-hosted, open source, monitoring, infrastructure" />
+		<link rel="icon" type="image/svg+xml" href="logo.svg" />
+
+		<!-- Open Graph -->
+		<meta property="og:title" content="Uptime Monitor - Self-Hosted Infrastructure Monitoring" />
+		<meta
+			property="og:description"
+			content="Open-source, self-hosted uptime monitoring with real-time WebSocket updates, beautiful status pages, and multi-region support."
+		/>
+		<meta property="og:type" content="website" />
+		<meta property="og:image" content="logo.svg" />
+
+		<!-- Fonts -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+			rel="stylesheet"
+		/>
+
+		<!-- Styles -->
+		<link rel="stylesheet" href="index.css" />
+	</head>
+	<body>
+		<!-- Header -->
+		<header class="header" id="header">
+			<div class="container">
+				<div class="header-inner">
+					<a href="#" class="logo">
+						<img src="logo.svg" alt="Uptime Monitor" class="logo-img" />
+						<span>Uptime Monitor</span>
+					</a>
+
+					<nav class="nav">
+						<ul class="nav-links">
+							<li><a href="#features">Features</a></li>
+							<li><a href="#protocols">Protocols</a></li>
+							<li><a href="#architecture">Architecture</a></li>
+							<li><a href="#demo">Demo</a></li>
+							<li>
+								<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/tree/main/docs" target="_blank">Docs</a>
+							</li>
+						</ul>
+
+						<div class="nav-cta">
+							<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server" target="_blank" class="btn btn-secondary">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+									<path
+										d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+									/>
+								</svg>
+								GitHub
+							</a>
+							<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/releases" target="_blank" class="btn btn-primary"> Get Started </a>
+						</div>
+
+						<button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M3 12h18M3 6h18M3 18h18" />
+							</svg>
+						</button>
+					</nav>
+				</div>
+
+				<!-- Mobile Menu -->
+				<div class="mobile-menu" id="mobileMenu">
+					<ul class="mobile-nav-links">
+						<li><a href="#features">Features</a></li>
+						<li><a href="#protocols">Protocols</a></li>
+						<li><a href="#architecture">Architecture</a></li>
+						<li><a href="#demo">Demo</a></li>
+						<li>
+							<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/tree/main/docs" target="_blank">Docs</a>
+						</li>
+					</ul>
+					<div class="mobile-nav-cta">
+						<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server" target="_blank" class="btn btn-secondary">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+								<path
+									d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+								/>
+							</svg>
+							GitHub
+						</a>
+						<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/releases" target="_blank" class="btn btn-primary"> Get Started </a>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<!-- Hero Section -->
+		<section class="hero">
+			<div class="hero-grid"></div>
+			<div class="container">
+				<div class="hero-content">
+					<div class="hero-badge">
+						<span class="pulse"></span>
+						Open Source • Self-Hosted • GPL-3.0
+					</div>
+
+					<h1 class="hero-title">
+						Infrastructure<br />
+						<span class="gradient">Monitoring</span><br />
+						Made Simple
+					</h1>
+
+					<p class="hero-subtitle">
+						Self-hosted uptime monitoring with real-time WebSocket updates, beautiful status pages, and multi-region distributed monitoring. Track HTTP, TCP,
+						databases, and 8 more protocols.
+					</p>
+
+					<div class="hero-actions">
+						<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/releases" target="_blank" class="btn btn-primary">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+							</svg>
+							Download Server
+						</a>
+						<a href="https://status.passky.org" target="_blank" class="btn btn-secondary">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+								<path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+							</svg>
+							Live Demo
+						</a>
+					</div>
+
+					<div class="hero-stats">
+						<div class="stat">
+							<div class="stat-value">11</div>
+							<div class="stat-label">Protocols</div>
+						</div>
+						<div class="stat">
+							<div class="stat-value">15</div>
+							<div class="stat-label">Themes</div>
+						</div>
+						<div class="stat">
+							<div class="stat-value">∞</div>
+							<div class="stat-label">Monitors</div>
+						</div>
+						<div class="stat">
+							<div class="stat-value">&lt;1s</div>
+							<div class="stat-label">Real-time</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Features Section -->
+		<section class="section features" id="features">
+			<div class="container">
+				<div class="section-header fade-in">
+					<span class="section-label">Features</span>
+					<h2 class="section-title">Everything You Need for Reliable Monitoring</h2>
+					<p class="section-desc">
+						A complete monitoring solution with real-time updates, beautiful status pages, and flexible alerting - all self-hosted and privacy-respecting.
+					</p>
+				</div>
+
+				<div class="features-grid">
+					<div class="feature-card fade-in">
+						<div class="feature-icon">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+							</svg>
+						</div>
+						<h3>Real-Time WebSocket</h3>
+						<p>Instant status updates via WebSocket connections. No polling, no delays - see changes as they happen.</p>
+					</div>
+
+					<div class="feature-card fade-in">
+						<div class="feature-icon">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+								<path d="M9 12l2 2 4-4" />
+							</svg>
+						</div>
+						<h3>Beautiful Status Pages</h3>
+						<p>15 stunning themes, responsive design, and customizable branding. Public or password-protected pages.</p>
+					</div>
+
+					<div class="feature-card fade-in">
+						<div class="feature-icon">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+							</svg>
+						</div>
+						<h3>Hierarchical Groups</h3>
+						<p>Organize monitors into nested groups with customizable health strategies: any-up, all-up, or percentage.</p>
+					</div>
+
+					<div class="feature-card fade-in">
+						<div class="feature-icon">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+							</svg>
+						</div>
+						<h3>Custom Metrics</h3>
+						<p>Track up to 3 custom numeric values per monitor. Player counts, connections, memory usage - anything you need.</p>
+					</div>
+
+					<div class="feature-card fade-in">
+						<div class="feature-icon">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+								<path d="M13.73 21a2 2 0 01-3.46 0" />
+							</svg>
+						</div>
+						<h3>Multi-Channel Alerts</h3>
+						<p>Discord webhooks, email (SMTP), and Ntfy notifications. Down, still-down, and recovery alerts.</p>
+					</div>
+
+					<div class="feature-card fade-in">
+						<div class="feature-icon">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<circle cx="12" cy="12" r="10" />
+								<path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+							</svg>
+						</div>
+						<h3>Multi-Region Monitoring</h3>
+						<p>Deploy PulseMonitor agents globally for distributed monitoring. Check from multiple locations simultaneously.</p>
+					</div>
+
+					<div class="feature-card fade-in">
+						<div class="feature-icon">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M3 3v18h18" />
+								<path d="M18 17V9M13 17V5M8 17v-3" />
+							</svg>
+						</div>
+						<h3>Historical Data</h3>
+						<p>Raw pulses for 24h, hourly aggregates for 90 days, daily aggregates forever. Powered by ClickHouse.</p>
+					</div>
+
+					<div class="feature-card fade-in">
+						<div class="feature-icon">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+								<path d="M22 6l-10 7L2 6" />
+							</svg>
+						</div>
+						<h3>Hot Reload</h3>
+						<p>Update configuration without restarts. Add monitors, change intervals, or modify groups on the fly.</p>
+					</div>
+
+					<div class="feature-card fade-in">
+						<div class="feature-icon">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+								<path d="M7 11V7a5 5 0 0110 0v4" />
+							</svg>
+						</div>
+						<h3>Self-Hosted & Private</h3>
+						<p>100% self-hosted. Your data stays on your infrastructure. No external dependencies or tracking.</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Protocols Section -->
+		<section class="section protocols" id="protocols">
+			<div class="container">
+				<div class="protocols-showcase">
+					<div class="protocols-visual fade-in">
+						<div class="protocols-ring" id="protocolsRing">
+							<div class="protocol-node">HTTP</div>
+							<div class="protocol-node">TCP</div>
+							<div class="protocol-node">MySQL</div>
+							<div class="protocol-node">Redis</div>
+							<div class="protocol-node">ICMP</div>
+							<div class="protocol-node">SMTP</div>
+							<div class="protocol-node">WS</div>
+							<div class="protocol-node">UDP</div>
+							<div class="protocol-center">
+								<span>11</span>
+								<small>Protocols</small>
+							</div>
+						</div>
+					</div>
+
+					<div class="protocols-content fade-in">
+						<span class="section-label">Protocols</span>
+						<h2>Monitor Any Service</h2>
+						<p>
+							From web endpoints to databases, email servers to game servers - PulseMonitor supports 11 protocols out of the box with configurable timeouts and
+							authentication.
+						</p>
+
+						<div class="protocol-list">
+							<div class="protocol-item">
+								<span class="icon">
+									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+										<path d="M9 12l2 2 4-4" />
+									</svg>
+								</span>
+								<span>HTTP / HTTPS</span>
+							</div>
+							<div class="protocol-item">
+								<span class="icon">
+									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+										<path d="M9 12l2 2 4-4" />
+									</svg>
+								</span>
+								<span>WebSocket</span>
+							</div>
+							<div class="protocol-item">
+								<span class="icon">
+									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+										<path d="M9 12l2 2 4-4" />
+									</svg>
+								</span>
+								<span>TCP / UDP</span>
+							</div>
+							<div class="protocol-item">
+								<span class="icon">
+									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+										<path d="M9 12l2 2 4-4" />
+									</svg>
+								</span>
+								<span>ICMP (Ping)</span>
+							</div>
+							<div class="protocol-item">
+								<span class="icon">
+									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+										<path d="M9 12l2 2 4-4" />
+									</svg>
+								</span>
+								<span>MySQL / MariaDB</span>
+							</div>
+							<div class="protocol-item">
+								<span class="icon">
+									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+										<path d="M9 12l2 2 4-4" />
+									</svg>
+								</span>
+								<span>PostgreSQL</span>
+							</div>
+							<div class="protocol-item">
+								<span class="icon">
+									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+										<path d="M9 12l2 2 4-4" />
+									</svg>
+								</span>
+								<span>Redis</span>
+							</div>
+							<div class="protocol-item">
+								<span class="icon">
+									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+										<path d="M9 12l2 2 4-4" />
+									</svg>
+								</span>
+								<span>SMTP / IMAP</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Architecture Section -->
+		<section class="section architecture" id="architecture">
+			<div class="container">
+				<div class="section-header fade-in">
+					<span class="section-label">Architecture</span>
+					<h2 class="section-title">Built for Scale & Reliability</h2>
+					<p class="section-desc">
+						A modular architecture with distributed monitoring agents, real-time WebSocket updates, and high-performance ClickHouse storage.
+					</p>
+				</div>
+
+				<div class="arch-visual fade-in">
+					<div class="arch-diagram">
+						<div class="arch-component">
+							<div class="icon">
+								<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<rect x="2" y="3" width="20" height="14" rx="2" />
+									<path d="M8 21h8M12 17v4" />
+								</svg>
+							</div>
+							<h4>PulseMonitor</h4>
+							<p>Distributed agents that check services and send heartbeats</p>
+						</div>
+
+						<div class="arch-arrow">→</div>
+
+						<div class="arch-component">
+							<div class="icon">
+								<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<rect x="2" y="2" width="20" height="8" rx="2" />
+									<rect x="2" y="14" width="20" height="8" rx="2" />
+									<path d="M6 6h.01M6 18h.01" />
+								</svg>
+							</div>
+							<h4>Uptime Server</h4>
+							<p>Central server processing pulses and managing state</p>
+						</div>
+
+						<div class="arch-arrow">→</div>
+
+						<div class="arch-component">
+							<div class="icon">
+								<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<ellipse cx="12" cy="5" rx="9" ry="3" />
+									<path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+									<path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+								</svg>
+							</div>
+							<h4>ClickHouse</h4>
+							<p>High-performance storage for pulses and aggregations</p>
+						</div>
+
+						<div class="arch-arrow">→</div>
+
+						<div class="arch-component">
+							<div class="icon">
+								<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+								</svg>
+							</div>
+							<h4>Status Page</h4>
+							<p>Real-time dashboard with WebSocket updates</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Code Preview Section -->
+		<section class="section code-preview" id="quickstart">
+			<div class="container">
+				<div class="section-header fade-in">
+					<span class="section-label">Quick Start</span>
+					<h2 class="section-title">Up and Running in Minutes</h2>
+					<p class="section-desc">Simple TOML configuration makes setup straightforward. Add monitors, groups, and status pages with just a few lines.</p>
+				</div>
+
+				<div class="code-block fade-in">
+					<div class="code-header">
+						<div class="code-dots">
+							<span class="code-dot red"></span>
+							<span class="code-dot yellow"></span>
+							<span class="code-dot green"></span>
+						</div>
+						<span class="code-filename">config.toml</span>
+					</div>
+					<div class="code-content">
+						<pre><span class="comment"># ClickHouse connection</span>
+<span class="bracket">[</span><span class="key">clickhouse</span><span class="bracket">]</span>
+<span class="key">url</span> = <span class="string">"http://user:pass@clickhouse:8123/uptime_monitor"</span>
+
+<span class="comment"># Define a monitor</span>
+<span class="bracket">[[</span><span class="key">monitors</span><span class="bracket">]]</span>
+<span class="key">id</span> = <span class="string">"api-prod"</span>
+<span class="key">name</span> = <span class="string">"Production API"</span>
+<span class="key">token</span> = <span class="string">"tk_prod_api_secret"</span>
+<span class="key">interval</span> = <span class="number">30</span>
+<span class="key">maxRetries</span> = <span class="number">2</span>
+<span class="key">resendNotification</span> = <span class="number">12</span>
+<span class="key">groupId</span> = <span class="string">"production"</span>
+<span class="key">notificationChannels</span> = <span class="bracket">[</span><span class="string">"critical"</span><span class="bracket">]</span>
+
+<span class="comment"># Optional: Configure PulseMonitor for automated checks</span>
+<span class="bracket">[</span><span class="key">monitors.pulse.http</span><span class="bracket">]</span>
+<span class="key">method</span> = <span class="string">"GET"</span>
+<span class="key">url</span> = <span class="string">"https://api.example.com/health"</span>
+<span class="key">timeout</span> = <span class="number">10</span>
+
+<span class="comment"># Create a group</span>
+<span class="bracket">[[</span><span class="key">groups</span><span class="bracket">]]</span>
+<span class="key">id</span> = <span class="string">"production"</span>
+<span class="key">name</span> = <span class="string">"Production Services"</span>
+<span class="key">strategy</span> = <span class="string">"percentage"</span>
+<span class="key">degradedThreshold</span> = <span class="number">50</span>
+<span class="key">interval</span> = <span class="number">30</span>
+
+<span class="comment"># Create a status page</span>
+<span class="bracket">[[</span><span class="key">status_pages</span><span class="bracket">]]</span>
+<span class="key">id</span> = <span class="string">"public"</span>
+<span class="key">name</span> = <span class="string">"Production"</span>
+<span class="key">slug</span> = <span class="string">"public"</span>
+<span class="key">items</span> = <span class="bracket">[</span><span class="string">"production"</span><span class="bracket">]</span></pre>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Demo Section -->
+		<section class="section demo" id="demo">
+			<div class="container">
+				<div class="demo-card fade-in">
+					<div class="demo-content">
+						<div class="demo-badge">
+							<span class="live-dot"></span>
+							Live Demo
+						</div>
+
+						<h2>See It In Action</h2>
+						<p>Check out our live status page powered by Uptime Monitor - monitoring real production services.</p>
+
+						<a href="https://status.passky.org" target="_blank" class="demo-link">
+							status.passky.org
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M7 17L17 7M7 7h10v10" />
+							</svg>
+						</a>
+
+						<a href="https://status.passky.org" target="_blank" class="btn btn-primary"> View Live Status Page </a>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Coming Soon Section -->
+		<section class="section coming-soon">
+			<div class="container">
+				<div class="coming-soon-card fade-in">
+					<div class="badge">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+						</svg>
+						Coming Soon
+					</div>
+
+					<h2>Visual Configuration Editor</h2>
+					<p>Upload your config.toml file and edit it through a beautiful visual interface. Export back when you're done.</p>
+
+					<div class="config-preview">
+						<div class="config-feature">
+							<span class="icon">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+									<path d="M14 2v6h6M12 18v-6M9 15h6" />
+								</svg>
+							</span>
+							<span>Upload config.toml</span>
+						</div>
+						<div class="config-feature">
+							<span class="icon">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+									<path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+								</svg>
+							</span>
+							<span>Visual Editing</span>
+						</div>
+						<div class="config-feature">
+							<span class="icon">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+								</svg>
+							</span>
+							<span>Export TOML</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Footer -->
+		<footer class="footer">
+			<div class="container">
+				<div class="footer-grid">
+					<div class="footer-brand">
+						<a href="#" class="logo">
+							<img src="logo.svg" alt="Uptime Monitor" class="logo-img" />
+							<span>Uptime Monitor</span>
+						</a>
+						<p>Open-source, self-hosted infrastructure monitoring by Rabbit Company.</p>
+						<div class="footer-social">
+							<a href="https://github.com/Rabbit-Company" target="_blank" aria-label="GitHub">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+									<path
+										d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+									/>
+								</svg>
+							</a>
+							<a href="https://rabbit-company.com" target="_blank" aria-label="Website">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<circle cx="12" cy="12" r="10" />
+									<path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+								</svg>
+							</a>
+						</div>
+					</div>
+
+					<div class="footer-column">
+						<h4>Products</h4>
+						<ul>
+							<li>
+								<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server" target="_blank">Uptime Server</a>
+							</li>
+							<li>
+								<a href="https://github.com/Rabbit-Company/UptimeMonitor-StatusPage" target="_blank">Status Page</a>
+							</li>
+							<li>
+								<a href="https://github.com/Rabbit-Company/PulseMonitor" target="_blank">PulseMonitor</a>
+							</li>
+						</ul>
+					</div>
+
+					<div class="footer-column">
+						<h4>Resources</h4>
+						<ul>
+							<li>
+								<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/tree/main/docs" target="_blank">Documentation</a>
+							</li>
+							<li>
+								<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/tree/main/docs/api.md" target="_blank">API Reference</a>
+							</li>
+							<li>
+								<a href="https://status.passky.org" target="_blank">Live Demo</a>
+							</li>
+							<li>
+								<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/releases" target="_blank">Releases</a>
+							</li>
+						</ul>
+					</div>
+
+					<div class="footer-column">
+						<h4>Company</h4>
+						<ul>
+							<li>
+								<a href="https://rabbit-company.com" target="_blank">Rabbit Company</a>
+							</li>
+							<li>
+								<a href="https://github.com/Rabbit-Company" target="_blank">Open Source</a>
+							</li>
+							<li>
+								<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/blob/main/LICENSE" target="_blank">License (GPL-3.0)</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="footer-bottom">
+					<span>© 2026 <a href="https://rabbit-company.com" target="_blank">Rabbit Company</a>. All rights reserved.</span>
+					<span>Made with ❤️ for the open source community</span>
+				</div>
+			</div>
+		</footer>
+
+		<!-- Scripts -->
+		<script type="module" src="index.js"></script>
+	</body>
+</html>
