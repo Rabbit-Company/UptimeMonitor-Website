@@ -40,6 +40,8 @@ try {
 	await fs.cp("./src/configurator.css", "./dist/configurator.css");
 	await fs.cp("./src/_headers", "./dist/_headers");
 	await fs.cp("./src/logo.svg", "./dist/logo.svg");
+	await fs.cp("./src/sitemap.xml", "./dist/sitemap.xml");
+	await fs.cp("./src/robots.txt", "./dist/robots.txt");
 
 	console.log("🎉 Build complete! Output in ./dist");
 } catch (error) {
