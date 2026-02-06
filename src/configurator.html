@@ -315,6 +315,54 @@
 			</div>
 		</section>
 
+		<!-- Relationship Visualizer -->
+		<section class="section visualizer-section" id="visualizer-section">
+			<div class="container">
+				<div class="visualizer-header">
+					<div class="visualizer-title-group">
+						<h2>Configuration <span class="gradient">Topology</span></h2>
+						<p>Interactive graph showing how monitors, groups, status pages, notifications, and PulseMonitor agents are connected.</p>
+					</div>
+					<div class="visualizer-controls">
+						<select
+							id="graph-filter"
+							class="form-select"
+							style="padding: 6px 32px 6px 12px; font-size: 0.85rem; width: auto; background-position: right 8px center"
+						>
+							<option value="all">Show All Connections</option>
+						</select>
+
+						<button class="btn btn-secondary btn-sm" data-action="graph-fit" title="Fit to view">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+							</svg>
+							Fit
+						</button>
+					</div>
+				</div>
+				<div class="visualizer-container">
+					<div id="cy-graph"></div>
+					<div class="visualizer-legend">
+						<div class="legend-item"><span class="legend-dot legend-dot-monitor"></span> Monitor</div>
+						<div class="legend-item"><span class="legend-dot legend-dot-group"></span> Group</div>
+						<div class="legend-item"><span class="legend-dot legend-dot-statuspage"></span> Status Page</div>
+						<div class="legend-item"><span class="legend-dot legend-dot-notification"></span> Notification</div>
+						<div class="legend-item"><span class="legend-dot legend-dot-pulse"></span> PulseMonitor</div>
+					</div>
+					<div class="visualizer-empty" id="graph-empty">
+						<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+							<circle cx="5.5" cy="7" r="2.5" />
+							<circle cx="18.5" cy="7" r="2.5" />
+							<circle cx="12" cy="18" r="2.5" />
+							<path d="M7.5 8.5L10.5 16M16.5 8.5L13.5 16M8 7h8" />
+						</svg>
+						<h3>No Connections Yet</h3>
+						<p>Import a config or add monitors and groups above to see the topology graph.</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
 		<!-- Footer -->
 		<footer class="footer">
 			<div class="container">

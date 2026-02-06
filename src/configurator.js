@@ -1,5 +1,9 @@
 import PasswordGenerator from "@rabbit-company/password-generator";
+import cytoscape from "cytoscape";
+import dagre from "cytoscape-dagre";
 import TOML from "smol-toml";
+
+cytoscape.use(dagre);
 
 let config = {
 	clickhouse: { url: "" },
@@ -131,6 +135,7 @@ function updateBadges() {
 	document.getElementById("badge-statuspages").textContent = config.status_pages.length;
 	document.getElementById("badge-notifications").textContent = Object.keys(config.notifications?.channels || {}).length;
 	document.getElementById("badge-pulsemonitors").textContent = config.PulseMonitors.length;
+	renderGraph();
 }
 
 function readGeneralFromUI() {
@@ -573,6 +578,7 @@ function renderStatusPages() {
 		)
 		.join("");
 	bindDynamicEvents(container);
+	updateGraphFilterOptions();
 }
 
 function addNotificationChannel() {
@@ -1203,7 +1209,310 @@ document.body.addEventListener("click", (e) => {
 		case "remove-pulsemonitor":
 			removePulseMonitor(idx);
 			break;
+		case "graph-fit":
+			if (cyInstance) cyInstance.fit(48);
+			break;
+		case "graph-reset":
+			renderGraph();
+			break;
 	}
+});
+
+let cyInstance = null;
+
+const NODE_COLORS = {
+	monitor: { bg: "#10b981", border: "#059669", glow: "rgba(16,185,129,0.35)" },
+	group: { bg: "#3b82f6", border: "#2563eb", glow: "rgba(59,130,246,0.35)" },
+	statuspage: { bg: "#8b5cf6", border: "#7c3aed", glow: "rgba(139,92,246,0.35)" },
+	notification: { bg: "#f59e0b", border: "#d97706", glow: "rgba(245,158,11,0.35)" },
+	pulse: { bg: "#06b6d4", border: "#0891b2", glow: "rgba(6,182,212,0.35)" },
+};
+
+const EDGE_COLORS = {
+	"monitor-group": "#3b82f6",
+	"monitor-notification": "#f59e0b",
+	"monitor-pulse": "#06b6d4",
+	"group-notification": "#f59e0b",
+	"group-parent": "#3b82f6",
+	"statuspage-item": "#8b5cf6",
+};
+
+function updateGraphFilterOptions() {
+	const select = document.getElementById("graph-filter");
+	const currentVal = select.value;
+
+	// Keep "All" as first option
+	let optionsHtml = `<option value="all">Show All Connections</option>`;
+
+	config.status_pages.forEach((sp) => {
+		if (sp.id) {
+			const label = sp.name || sp.slug || sp.id;
+			optionsHtml += `<option value="sp-${sp.id}">${esc(label)}</option>`;
+		}
+	});
+
+	select.innerHTML = optionsHtml;
+
+	// Restore selection if it still exists, otherwise default to all
+	if (currentVal && select.querySelector(`option[value="${currentVal}"]`)) {
+		select.value = currentVal;
+	} else {
+		select.value = "all";
+	}
+}
+
+function buildGraphData() {
+	const nodes = [];
+	const edges = [];
+	const nodeIds = new Set();
+
+	// 1. Monitors
+	for (const m of config.monitors) {
+		if (!m.id) continue;
+		const nid = `mon-${m.id}`;
+		nodes.push({ data: { id: nid, label: m.name || m.id, type: "monitor" } });
+		nodeIds.add(nid);
+
+		if (m.groupId) {
+			// DIRECTION FIX: Group (Parent) -> Monitor (Child)
+			edges.push({ data: { source: `grp-${m.groupId}`, target: nid, edgeType: "monitor-group" } });
+		}
+		if (m.notificationChannels) {
+			for (const nc of m.notificationChannels) {
+				edges.push({ data: { source: nid, target: `ntf-${nc}`, edgeType: "monitor-notification" } });
+			}
+		}
+		if (m.pulseMonitors) {
+			for (const pm of m.pulseMonitors) {
+				edges.push({ data: { source: nid, target: `pm-${pm}`, edgeType: "monitor-pulse" } });
+			}
+		}
+	}
+
+	// 2. Groups
+	for (const g of config.groups) {
+		if (!g.id) continue;
+		const nid = `grp-${g.id}`;
+		if (!nodeIds.has(nid)) {
+			nodes.push({ data: { id: nid, label: g.name || g.id, type: "group" } });
+			nodeIds.add(nid);
+		}
+		if (g.parentId) {
+			// DIRECTION FIX: Parent Group -> Child Group
+			edges.push({ data: { source: `grp-${g.parentId}`, target: nid, edgeType: "group-parent" } });
+		}
+		if (g.notificationChannels) {
+			for (const nc of g.notificationChannels) {
+				edges.push({ data: { source: nid, target: `ntf-${nc}`, edgeType: "group-notification" } });
+			}
+		}
+	}
+
+	// 3. Status Pages
+	for (const sp of config.status_pages) {
+		if (!sp.id) continue;
+		const nid = `sp-${sp.id}`;
+		nodes.push({ data: { id: nid, label: sp.name || sp.slug || sp.id, type: "statuspage" } });
+		nodeIds.add(nid);
+
+		if (sp.items) {
+			for (const item of sp.items) {
+				const monTarget = `mon-${item}`;
+				const grpTarget = `grp-${item}`;
+				// Status Page -> Item (Monitor or Group)
+				if (nodeIds.has(monTarget)) {
+					edges.push({ data: { source: nid, target: monTarget, edgeType: "statuspage-item" } });
+				} else {
+					edges.push({ data: { source: nid, target: grpTarget, edgeType: "statuspage-item" } });
+				}
+			}
+		}
+	}
+
+	// 4. Notifications (Leaf nodes)
+	const channels = config.notifications?.channels || {};
+	for (const key of Object.keys(channels)) {
+		const ch = channels[key];
+		const chId = ch.id || key;
+		const nid = `ntf-${chId}`;
+		if (!nodeIds.has(nid)) {
+			nodes.push({ data: { id: nid, label: ch.name || chId, type: "notification" } });
+			nodeIds.add(nid);
+		}
+	}
+
+	// 5. PulseMonitors (Leaf nodes)
+	for (const pm of config.PulseMonitors) {
+		if (!pm.id) continue;
+		const nid = `pm-${pm.id}`;
+		if (!nodeIds.has(nid)) {
+			nodes.push({ data: { id: nid, label: pm.name || pm.id, type: "pulse" } });
+			nodeIds.add(nid);
+		}
+	}
+
+	// Only return edges where both nodes actually exist
+	const validEdges = edges.filter((e) => nodeIds.has(e.data.source) && nodeIds.has(e.data.target));
+
+	return { nodes, edges: validEdges };
+}
+
+function renderGraph() {
+	// 1. Build the full map of everything
+	let { nodes, edges } = buildGraphData();
+
+	const filterSelect = document.getElementById("graph-filter");
+	const filterId = filterSelect ? filterSelect.value : "all";
+
+	// 2. Apply Filtering if not "all"
+	if (filterId !== "all" && filterId.startsWith("sp-")) {
+		const keepNodeIds = new Set();
+		const queue = [filterId];
+
+		// Add the Status Page itself
+		keepNodeIds.add(filterId);
+
+		// Breadth-First Search to find all descendants
+		// (StatusPage -> Group -> Monitor -> Notification/Pulse)
+		while (queue.length > 0) {
+			const currentId = queue.shift();
+
+			// Find all edges starting from this node
+			const outgoingEdges = edges.filter((e) => e.data.source === currentId);
+
+			for (const edge of outgoingEdges) {
+				const targetId = edge.data.target;
+				if (!keepNodeIds.has(targetId)) {
+					keepNodeIds.add(targetId);
+					queue.push(targetId);
+				}
+			}
+		}
+
+		// Filter the arrays
+		nodes = nodes.filter((n) => keepNodeIds.has(n.data.id));
+		edges = edges.filter((e) => keepNodeIds.has(e.data.source) && keepNodeIds.has(e.data.target));
+	}
+
+	const emptyEl = document.getElementById("graph-empty");
+	const container = document.getElementById("cy-graph");
+
+	if (nodes.length === 0) {
+		emptyEl.classList.remove("hidden");
+		if (cyInstance) {
+			cyInstance.destroy();
+			cyInstance = null;
+		}
+		return;
+	}
+
+	emptyEl.classList.add("hidden");
+
+	if (cyInstance) cyInstance.destroy();
+
+	cyInstance = cytoscape({
+		container: container,
+		elements: [...nodes, ...edges],
+		minZoom: 0.3,
+		maxZoom: 3,
+		wheelSensitivity: 0.3,
+		style: [
+			{
+				selector: "node",
+				style: {
+					label: "data(label)",
+					"text-valign": "bottom",
+					"text-halign": "center",
+					"text-margin-y": 8,
+					"font-size": 11,
+					"font-family": "system-ui, -apple-system, sans-serif",
+					"font-weight": 500,
+					color: "#9ca3af",
+					"text-outline-width": 2,
+					"text-outline-color": "#050810",
+					"text-outline-opacity": 0.9,
+					width: 40,
+					height: 40,
+					"border-width": 2,
+					"overlay-padding": 6,
+					"overlay-opacity": 0,
+				},
+			},
+			...Object.entries(NODE_COLORS).map(([type, colors]) => ({
+				selector: `node[type="${type}"]`,
+				style: {
+					"background-color": colors.bg,
+					"border-color": colors.border,
+					"background-opacity": 0.9,
+				},
+			})),
+			{
+				selector: "edge",
+				style: {
+					width: 1.5,
+					"line-color": "#374151",
+					"target-arrow-color": "#374151",
+					"target-arrow-shape": "triangle",
+					"arrow-scale": 0.8,
+					"curve-style": "bezier",
+					opacity: 0.5,
+				},
+			},
+			{
+				selector: 'edge[edgeType="monitor-group"], edge[edgeType="group-parent"]',
+				style: {
+					"line-style": "dashed",
+					"target-arrow-shape": "none",
+				},
+			},
+			...Object.entries(EDGE_COLORS).map(([type, color]) => ({
+				selector: `edge[edgeType="${type}"]`,
+				style: {
+					"line-color": color,
+					"target-arrow-color": color,
+				},
+			})),
+		],
+		layout: {
+			name: "dagre",
+			rankDir: "TB",
+			rankSep: 80,
+			nodeSep: 60,
+			padding: 48,
+			animate: true,
+			animationDuration: 500,
+		},
+	});
+
+	// Hover effects
+	cyInstance.on("mouseover", "node", (e) => {
+		const node = e.target;
+		node.style({
+			width: 48,
+			height: 48,
+			"border-width": 3,
+			"border-color": "#ffffff",
+			"font-size": 12,
+			color: "#ffffff",
+			"z-index": 999,
+		});
+		const connected = node.connectedEdges();
+		connected.style({ opacity: 1, width: 3, "z-index": 998 });
+		node.neighborhood("node").style({
+			"border-width": 3,
+			"border-color": "#fff",
+			"z-index": 998,
+		});
+		cyInstance.elements().not(node).not(connected).not(node.neighborhood("node")).style({ opacity: 0.1 });
+	});
+
+	cyInstance.on("mouseout", "node", () => {
+		cyInstance.elements().removeStyle();
+	});
+}
+
+document.getElementById("graph-filter").addEventListener("change", () => {
+	renderGraph();
 });
 
 loadConfigToUI();
