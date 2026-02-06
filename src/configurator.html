@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Configuration Editor - Uptime Monitor</title>
+		<meta name="description" content="Visual configuration editor for Uptime Monitor. Import, edit, and export your config.toml with an intuitive interface." />
+		<link rel="icon" type="image/svg+xml" href="logo.svg" />
+		<link rel="stylesheet" href="configurator.css" />
+	</head>
+	<body>
+		<!-- Header -->
+		<header class="header" id="header">
+			<div class="container">
+				<div class="header-inner">
+					<a href="index.html" class="logo">
+						<img src="logo.svg" alt="Uptime Monitor" class="logo-img" />
+						<span>Uptime Monitor</span>
+					</a>
+					<nav class="nav">
+						<ul class="nav-links">
+							<li><a href="index.html">Home</a></li>
+							<li><a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/tree/main/docs" target="_blank">Docs</a></li>
+							<li><a href="https://status.passky.org" target="_blank">Demo</a></li>
+						</ul>
+						<div class="nav-cta">
+							<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server" target="_blank" class="btn btn-secondary">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+									<path
+										d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+									/>
+								</svg>
+								GitHub
+							</a>
+						</div>
+						<button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18" /></svg>
+						</button>
+					</nav>
+				</div>
+				<div class="mobile-menu" id="mobileMenu">
+					<ul class="mobile-nav-links">
+						<li><a href="index.html">Home</a></li>
+						<li><a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/tree/main/docs" target="_blank">Docs</a></li>
+						<li><a href="https://status.passky.org" target="_blank">Demo</a></li>
+					</ul>
+					<div class="mobile-nav-cta">
+						<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server" target="_blank" class="btn btn-secondary">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+								<path
+									d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+								/>
+							</svg>
+							GitHub
+						</a>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<!-- Page Hero -->
+		<section class="page-hero">
+			<div class="container">
+				<div class="page-hero-content">
+					<h1>Visual <span class="gradient">Configuration</span> Editor</h1>
+					<p>Import your config.toml, edit visually, and export back. No more manual TOML wrangling.</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Main Content -->
+		<section class="config-main">
+			<div class="container">
+				<!-- Toolbar -->
+				<div class="toolbar">
+					<div class="toolbar-group">
+						<button class="btn btn-secondary btn-sm" data-action="import-toml">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+								<polyline points="17 8 12 3 7 8" />
+								<line x1="12" y1="3" x2="12" y2="15" />
+							</svg>
+							Import TOML
+						</button>
+						<input type="file" id="fileInput" accept=".toml,.txt" />
+						<button class="btn btn-secondary btn-sm" data-action="load-example">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+								<polyline points="14 2 14 8 20 8" />
+							</svg>
+							Load Example
+						</button>
+						<button class="btn btn-secondary btn-sm" data-action="reset-config">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<polyline points="1 4 1 10 7 10" />
+								<path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+							</svg>
+							Reset
+						</button>
+					</div>
+					<div class="toolbar-group">
+						<button class="btn btn-primary btn-sm" data-action="export-toml">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+								<polyline points="7 10 12 15 17 10" />
+								<line x1="12" y1="15" x2="12" y2="3" />
+							</svg>
+							Export TOML
+						</button>
+					</div>
+				</div>
+
+				<!-- Tabs -->
+				<div class="tabs" id="tabs">
+					<button class="tab active" data-tab="general">General</button>
+					<button class="tab" data-tab="monitors">Monitors <span class="tab-badge" id="badge-monitors">0</span></button>
+					<button class="tab" data-tab="groups">Groups <span class="tab-badge" id="badge-groups">0</span></button>
+					<button class="tab" data-tab="statuspages">Status Pages <span class="tab-badge" id="badge-statuspages">0</span></button>
+					<button class="tab" data-tab="notifications">Notifications <span class="tab-badge" id="badge-notifications">0</span></button>
+					<button class="tab" data-tab="pulsemonitors">PulseMonitors <span class="tab-badge" id="badge-pulsemonitors">0</span></button>
+				</div>
+
+				<!-- General Tab -->
+				<div class="tab-panel active" id="panel-general">
+					<!-- ClickHouse -->
+					<div class="config-card">
+						<div class="config-card-header">
+							<div class="config-card-title">
+								<h3>ClickHouse Connection</h3>
+								<span class="badge">Required</span>
+							</div>
+						</div>
+						<div class="form-grid">
+							<div class="form-group full-width">
+								<label class="form-label">Connection URL <span class="required">*</span></label>
+								<input class="form-input mono" type="text" id="ch-url" placeholder="http://user:pass@clickhouse:8123/uptime_monitor" />
+								<span class="form-hint">Format: http://user:password@host:port/database</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Server -->
+					<div class="config-card">
+						<div class="config-card-header">
+							<div class="config-card-title"><h3>Server Settings</h3></div>
+						</div>
+						<div class="form-grid">
+							<div class="form-group">
+								<label class="form-label">Port</label>
+								<input class="form-input" type="number" id="srv-port" placeholder="3000" />
+							</div>
+							<div class="form-group">
+								<label class="form-label">Proxy Preset</label>
+								<select class="form-select" id="srv-proxy">
+									<option value="">Default (direct)</option>
+									<option value="direct">direct</option>
+									<option value="cloudflare">cloudflare</option>
+									<option value="aws">aws</option>
+									<option value="gcp">gcp</option>
+									<option value="azure">azure</option>
+									<option value="vercel">vercel</option>
+									<option value="nginx">nginx</option>
+									<option value="development">development</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label class="form-label">Reload Token</label>
+								<input class="form-input mono" type="text" id="srv-reloadToken" placeholder="Auto-generated if empty" />
+							</div>
+						</div>
+					</div>
+
+					<!-- Logger -->
+					<div class="config-card">
+						<div class="config-card-header">
+							<div class="config-card-title"><h3>Logger</h3></div>
+						</div>
+						<div class="form-grid">
+							<div class="form-group">
+								<label class="form-label">Log Level</label>
+								<select class="form-select" id="log-level">
+									<option value="">Default (4 - HTTP)</option>
+									<option value="0">0 - ERROR</option>
+									<option value="1">1 - WARN</option>
+									<option value="2">2 - AUDIT</option>
+									<option value="3">3 - INFO</option>
+									<option value="4">4 - HTTP</option>
+									<option value="5">5 - DEBUG</option>
+									<option value="6">6 - VERBOSE</option>
+									<option value="7">7 - SILLY</option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<!-- Missing Pulse Detector -->
+					<div class="config-card">
+						<div class="config-card-header">
+							<div class="config-card-title"><h3>Missing Pulse Detector</h3></div>
+						</div>
+						<div class="form-grid">
+							<div class="form-group">
+								<label class="form-label">Check Interval (seconds)</label>
+								<input class="form-input" type="number" id="mpd-interval" placeholder="5" min="1" />
+							</div>
+						</div>
+					</div>
+
+					<!-- Self-Monitoring -->
+					<div class="config-card">
+						<div class="config-card-header">
+							<div class="config-card-title"><h3>Self-Monitoring</h3></div>
+						</div>
+						<div class="form-grid">
+							<div class="form-group">
+								<label class="form-check">
+									<input type="checkbox" id="sm-enabled" />
+									<span class="form-check-label">Enable self-monitoring</span>
+								</label>
+							</div>
+							<div class="form-group">
+								<label class="form-label">ID</label>
+								<input class="form-input mono" type="text" id="sm-id" placeholder="self-monitor" />
+							</div>
+							<div class="form-group">
+								<label class="form-label">Interval (seconds)</label>
+								<input class="form-input" type="number" id="sm-interval" placeholder="3" min="1" />
+							</div>
+							<div class="form-group">
+								<label class="form-check">
+									<input type="checkbox" id="sm-backfill" />
+									<span class="form-check-label">Backfill on recovery</span>
+								</label>
+							</div>
+							<div class="form-group">
+								<label class="form-label">Latency Strategy</label>
+								<select class="form-select" id="sm-latencyStrategy">
+									<option value="last-known">last-known</option>
+									<option value="null">null</option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Monitors Tab -->
+				<div class="tab-panel" id="panel-monitors">
+					<div id="monitors-list"></div>
+					<div style="text-align: center; margin-top: 16px">
+						<button class="btn btn-secondary" data-action="add-monitor">
+							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<line x1="12" y1="5" x2="12" y2="19" />
+								<line x1="5" y1="12" x2="19" y2="12" />
+							</svg>
+							Add Monitor
+						</button>
+					</div>
+				</div>
+
+				<!-- Groups Tab -->
+				<div class="tab-panel" id="panel-groups">
+					<div id="groups-list"></div>
+					<div style="text-align: center; margin-top: 16px">
+						<button class="btn btn-secondary" data-action="add-group">
+							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<line x1="12" y1="5" x2="12" y2="19" />
+								<line x1="5" y1="12" x2="19" y2="12" />
+							</svg>
+							Add Group
+						</button>
+					</div>
+				</div>
+
+				<!-- Status Pages Tab -->
+				<div class="tab-panel" id="panel-statuspages">
+					<div id="statuspages-list"></div>
+					<div style="text-align: center; margin-top: 16px">
+						<button class="btn btn-secondary" data-action="add-statuspage">
+							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<line x1="12" y1="5" x2="12" y2="19" />
+								<line x1="5" y1="12" x2="19" y2="12" />
+							</svg>
+							Add Status Page
+						</button>
+					</div>
+				</div>
+
+				<!-- Notifications Tab -->
+				<div class="tab-panel" id="panel-notifications">
+					<div id="notifications-list"></div>
+					<div style="text-align: center; margin-top: 16px">
+						<button class="btn btn-secondary" data-action="add-notification">
+							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<line x1="12" y1="5" x2="12" y2="19" />
+								<line x1="5" y1="12" x2="19" y2="12" />
+							</svg>
+							Add Notification Channel
+						</button>
+					</div>
+				</div>
+
+				<!-- PulseMonitors Tab -->
+				<div class="tab-panel" id="panel-pulsemonitors">
+					<div id="pulsemonitors-list"></div>
+					<div style="text-align: center; margin-top: 16px">
+						<button class="btn btn-secondary" data-action="add-pulsemonitor">
+							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<line x1="12" y1="5" x2="12" y2="19" />
+								<line x1="5" y1="12" x2="19" y2="12" />
+							</svg>
+							Add PulseMonitor
+						</button>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Footer -->
+		<footer class="footer">
+			<div class="container">
+				<div class="footer-grid">
+					<div class="footer-brand">
+						<a href="#" class="logo">
+							<img src="logo.svg" alt="Uptime Monitor" class="logo-img" />
+							<span>Uptime Monitor</span>
+						</a>
+						<p>Open-source, self-hosted infrastructure monitoring by Rabbit Company.</p>
+						<div class="footer-social">
+							<a href="https://github.com/Rabbit-Company" target="_blank" aria-label="GitHub">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+									<path
+										d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+									/>
+								</svg>
+							</a>
+							<a href="https://rabbit-company.com" target="_blank" aria-label="Website">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<circle cx="12" cy="12" r="10" />
+									<path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+								</svg>
+							</a>
+						</div>
+					</div>
+
+					<div class="footer-column">
+						<h4>Products</h4>
+						<ul>
+							<li>
+								<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server" target="_blank">Uptime Server</a>
+							</li>
+							<li>
+								<a href="https://github.com/Rabbit-Company/UptimeMonitor-StatusPage" target="_blank">Status Page</a>
+							</li>
+							<li>
+								<a href="https://github.com/Rabbit-Company/PulseMonitor" target="_blank">PulseMonitor</a>
+							</li>
+						</ul>
+					</div>
+
+					<div class="footer-column">
+						<h4>Resources</h4>
+						<ul>
+							<li>
+								<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/tree/main/docs" target="_blank">Documentation</a>
+							</li>
+							<li>
+								<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/tree/main/docs/api.md" target="_blank">API Reference</a>
+							</li>
+							<li>
+								<a href="https://status.passky.org" target="_blank">Live Demo</a>
+							</li>
+							<li>
+								<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/releases" target="_blank">Releases</a>
+							</li>
+						</ul>
+					</div>
+
+					<div class="footer-column">
+						<h4>Company</h4>
+						<ul>
+							<li>
+								<a href="https://rabbit-company.com" target="_blank">Rabbit Company</a>
+							</li>
+							<li>
+								<a href="https://github.com/Rabbit-Company" target="_blank">Open Source</a>
+							</li>
+							<li>
+								<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/blob/main/LICENSE" target="_blank">License (GPL-3.0)</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="footer-bottom">
+					<span>© 2026 <a href="https://rabbit-company.com" target="_blank">Rabbit Company</a>. All rights reserved.</span>
+					<span>Made with ❤️ for the open source community</span>
+				</div>
+			</div>
+		</footer>
+
+		<!-- Toast -->
+		<div class="toast" id="toast"></div>
+
+		<!-- Scripts -->
+		<script type="module" src="configurator.js"></script>
+	</body>
+</html>

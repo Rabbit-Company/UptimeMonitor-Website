@@ -20,8 +20,24 @@ try {
 		process.exit(1);
 	}
 
+	const result2 = await Bun.build({
+		entrypoints: ["./src/configurator.js"],
+		outdir: "./dist",
+		target: "browser",
+		format: "esm",
+		minify: false,
+		sourcemap: "external",
+	});
+
+	if (!result2.success) {
+		console.error("❌ Build failed:", result2.logs);
+		process.exit(1);
+	}
+
 	await fs.cp("./src/index.html", "./dist/index.html");
 	await fs.cp("./src/index.css", "./dist/index.css");
+	await fs.cp("./src/configurator.html", "./dist/configurator.html");
+	await fs.cp("./src/configurator.css", "./dist/configurator.css");
 	await fs.cp("./src/_headers", "./dist/_headers");
 	await fs.cp("./src/logo.svg", "./dist/logo.svg");
 

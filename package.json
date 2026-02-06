@@ -1,7 +1,7 @@
 {
 	"name": "uptimemonitor-website",
 	"module": "src/index.js",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"type": "module",
 	"private": true,
 	"scripts": {
@@ -13,5 +13,8 @@
 	"peerDependencies": {
 		"typescript": "^5.9.3"
 	},
-	"dependencies": {}
+	"dependencies": {
+		"@rabbit-company/password-generator": "^2.2.0",
+		"smol-toml": "^1.6.0"
+	}
 }

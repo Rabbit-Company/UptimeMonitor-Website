@@ -904,6 +904,16 @@ a:hover {
 	margin-bottom: 24px;
 }
 
+.coming-soon-card .badge-live {
+	background: rgba(16, 185, 129, 0.15);
+	border-color: rgba(16, 185, 129, 0.3);
+	color: var(--accent-primary);
+}
+
+.configurator-cta {
+	margin-top: 32px;
+}
+
 .coming-soon-card h2 {
 	font-size: 2rem;
 	margin-bottom: 16px;
