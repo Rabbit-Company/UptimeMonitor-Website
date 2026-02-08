@@ -610,7 +610,7 @@ function renderNotifications() {
 <div class="empty-state">
 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
 <h3>No Notification Channels</h3>
-<p>Configure Discord, Email, or Ntfy notifications.</p>
+<p>Configure Discord, Email, Ntfy, or Telegram notifications.</p>
 </div>`;
 		return;
 	}
@@ -751,6 +751,42 @@ function renderNotifications() {
 	<label class="form-label">Token</label>
 	<input class="form-input mono" type="text" value="${esc(ch.ntfy?.token || "")}" placeholder="Optional"
 		data-bind="notifications.channels.${key}.ntfy.token" data-ensure="notifications.channels.${key}.ntfy" data-empty-undefined />
+</div>
+</div>
+
+<!-- Telegram -->
+<hr class="form-divider"/>
+<div class="form-section-title">Telegram</div>
+<div class="form-grid">
+<div class="form-group">
+	<label class="form-check">
+		<input type="checkbox" ${ch.telegram?.enabled ? "checked" : ""} data-bind="notifications.channels.${key}.telegram.enabled" data-type="boolean" data-ensure="notifications.channels.${key}.telegram" />
+		<span class="form-check-label">Enable Telegram</span>
+	</label>
+</div>
+<div class="form-group">
+	<label class="form-label">Bot Token</label>
+	<input class="form-input mono" type="text" value="${esc(ch.telegram?.botToken || "")}" placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+		data-bind="notifications.channels.${key}.telegram.botToken" data-ensure="notifications.channels.${key}.telegram" />
+	<span class="form-hint">Get from @BotFather on Telegram</span>
+</div>
+<div class="form-group">
+	<label class="form-label">Chat ID</label>
+	<input class="form-input mono" type="text" value="${esc(ch.telegram?.chatId || "")}" placeholder="-1001234567890"
+		data-bind="notifications.channels.${key}.telegram.chatId" data-ensure="notifications.channels.${key}.telegram" />
+	<span class="form-hint">User, group, or channel ID</span>
+</div>
+<div class="form-group">
+	<label class="form-label">Topic ID</label>
+	<input class="form-input" type="number" value="${ch.telegram?.topicId ?? ""}"
+		data-bind="notifications.channels.${key}.telegram.topicId" data-type="number" data-ensure="notifications.channels.${key}.telegram" data-empty-undefined />
+	<span class="form-hint">Optional — for forum groups with topics</span>
+</div>
+<div class="form-group">
+	<label class="form-check">
+		<input type="checkbox" ${ch.telegram?.disableNotification ? "checked" : ""} data-bind="notifications.channels.${key}.telegram.disableNotification" data-type="boolean" data-ensure="notifications.channels.${key}.telegram" data-empty-undefined />
+		<span class="form-check-label">Send silently (no notification sound)</span>
+	</label>
 </div>
 </div>
 </div>`;
@@ -1055,6 +1091,11 @@ enabled = true
 enabled = true
 server = "https://ntfy.sh"
 topic = "my-uptime-alerts"
+
+[notifications.channels.ops-team.telegram]
+enabled = true
+botToken = "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+chatId = "-1001234567890"
 `;
 	parseTOML(example);
 	showToast("Example configuration loaded!");
