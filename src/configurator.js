@@ -67,13 +67,80 @@ function showToast(msg, error = false) {
 	setTimeout(() => t.classList.remove("show"), 3000);
 }
 
+function flushActiveTabEdits() {
+	const activeTab = document.querySelector("#tabs .tab.active")?.dataset?.tab;
+	switch (activeTab) {
+		case "general":
+			readGeneralFromUI();
+			break;
+		case "monitors":
+			flushBindings(document.getElementById("monitors-list"));
+			break;
+		case "groups":
+			flushBindings(document.getElementById("groups-list"));
+			break;
+		case "statuspages":
+			flushBindings(document.getElementById("statuspages-list"));
+			break;
+		case "notifications":
+			flushBindings(document.getElementById("notifications-list"));
+			break;
+		case "pulsemonitors":
+			flushBindings(document.getElementById("pulsemonitors-list"));
+			break;
+		default:
+			break;
+	}
+}
+
+function pruneNotificationChannelRefs(...ids) {
+	const removeSet = new Set(ids.filter(Boolean));
+	if (removeSet.size === 0) return;
+	// Monitors
+	for (const m of config.monitors || []) {
+		if (Array.isArray(m.notificationChannels)) {
+			m.notificationChannels = m.notificationChannels.filter((v) => !removeSet.has(v));
+			if (m.notificationChannels.length === 0) delete m.notificationChannels;
+		}
+	}
+	// Groups
+	for (const g of config.groups || []) {
+		if (Array.isArray(g.notificationChannels)) {
+			g.notificationChannels = g.notificationChannels.filter((v) => !removeSet.has(v));
+			if (g.notificationChannels.length === 0) delete g.notificationChannels;
+		}
+	}
+}
+
+function replaceNotificationChannelRefs(oldId, newId) {
+	if (!oldId || !newId || oldId === newId) return;
+	const replace = (arr) => arr.map((v) => (v === oldId ? newId : v));
+	for (const m of config.monitors || []) {
+		if (Array.isArray(m.notificationChannels)) m.notificationChannels = replace(m.notificationChannels);
+	}
+	for (const g of config.groups || []) {
+		if (Array.isArray(g.notificationChannels)) g.notificationChannels = replace(g.notificationChannels);
+	}
+}
+
 document.getElementById("tabs").addEventListener("click", (e) => {
 	const tab = e.target.closest(".tab");
 	if (!tab) return;
+	// Capture which tab we are leaving (used for dependent refreshes)
+	const prevTab = document.querySelector("#tabs .tab.active")?.dataset?.tab;
+	// Ensure we don't lose edits (and keep dependent UIs in sync)
+	flushActiveTabEdits();
+
 	document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
 	document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
 	tab.classList.add("active");
 	document.getElementById("panel-" + tab.dataset.tab).classList.add("active");
+
+	renderMonitors();
+	renderGroups();
+	renderStatusPages();
+	renderNotifications();
+	renderPulseMonitors();
 });
 
 window.addEventListener("scroll", () => {
@@ -173,6 +240,8 @@ function readGeneralFromUI() {
 }
 
 function addMonitor() {
+	// Persist any unsaved edits in the current list before mutating
+	flushBindings(document.getElementById("monitors-list"));
 	config.monitors.push({
 		id: uid(),
 		name: "",
@@ -186,13 +255,55 @@ function addMonitor() {
 }
 
 function removeMonitor(idx) {
+	flushBindings(document.getElementById("monitors-list"));
 	config.monitors.splice(idx, 1);
 	renderMonitors();
 	updateBadges();
 }
 
+let isFlushing = false;
+
+function flushBindings(container) {
+	if (isFlushing) return;
+	isFlushing = true;
+	container.querySelectorAll("[data-bind]").forEach((el) => {
+		const path = el.dataset.bind;
+		if (!path) return;
+
+		if (el.dataset.ensure) {
+			ensurePath(el.dataset.ensure);
+		}
+
+		const { parent, key } = resolvePath(path);
+		const dataType = el.dataset.type;
+		const emptyUndefined = el.hasAttribute("data-empty-undefined");
+
+		let value;
+		if (dataType === "boolean") {
+			value = el.checked;
+		} else if (dataType === "number") {
+			value = el.value === "" ? undefined : Number(el.value);
+		} else if (dataType === "csv") {
+			value = el.value
+				.split(",")
+				.map((s) => s.trim())
+				.filter(Boolean);
+		} else {
+			value = el.value;
+		}
+
+		if (emptyUndefined && (value === "" || value === undefined)) {
+			delete parent[key];
+		} else {
+			parent[key] = value;
+		}
+	});
+	isFlushing = false;
+}
+
 function renderMonitors() {
 	const container = document.getElementById("monitors-list");
+
 	if (config.monitors.length === 0) {
 		container.innerHTML = `
 <div class="empty-state">
@@ -261,11 +372,11 @@ function renderMonitorCard(m, idx) {
 </div>
 <div class="form-group">
 <label class="form-label">Notification Channels</label>
-${renderTagsInput(`mon-nc-${idx}`, m.notificationChannels || [], "monitors", idx, "notificationChannels")}
+${renderMultiSelect(`mon-nc-${idx}`, m.notificationChannels || [], "monitors", idx, "notificationChannels")}
 </div>
 <div class="form-group">
 <label class="form-label">PulseMonitor Agents</label>
-${renderTagsInput(`mon-pm-${idx}`, m.pulseMonitors || [], "monitors", idx, "pulseMonitors")}
+${renderMultiSelect(`mon-pm-${idx}`, m.pulseMonitors || [], "monitors", idx, "pulseMonitors")}
 </div>
 </div>
 
@@ -412,6 +523,7 @@ ${fieldSet
 }
 
 function addGroup() {
+	flushBindings(document.getElementById("groups-list"));
 	config.groups.push({
 		id: uid(),
 		name: "",
@@ -421,17 +533,21 @@ function addGroup() {
 		resendNotification: 0,
 	});
 	renderGroups();
+	renderMonitors();
 	updateBadges();
 }
 
 function removeGroup(idx) {
+	flushBindings(document.getElementById("groups-list"));
 	config.groups.splice(idx, 1);
 	renderGroups();
+	renderMonitors();
 	updateBadges();
 }
 
 function renderGroups() {
 	const container = document.getElementById("groups-list");
+
 	if (config.groups.length === 0) {
 		container.innerHTML = `
 <div class="empty-state">
@@ -463,11 +579,11 @@ function renderGroups() {
 <div class="form-grid">
 <div class="form-group">
 	<label class="form-label">ID <span class="required">*</span></label>
-	<input class="form-input mono" type="text" value="${g.id || ""}" data-bind="groups.${i}.id" />
+	<input class="form-input mono" type="text" value="${g.id || ""}" data-bind="groups.${i}.id" data-rerender="groups" />
 </div>
 <div class="form-group">
 	<label class="form-label">Name <span class="required">*</span></label>
-	<input class="form-input" type="text" value="${esc(g.name || "")}" data-bind="groups.${i}.name" data-update-title />
+	<input class="form-input" type="text" value="${esc(g.name || "")}" data-bind="groups.${i}.name" data-update-title data-rerender="groups" />
 </div>
 <div class="form-group">
 	<label class="form-label">Strategy <span class="required">*</span></label>
@@ -491,14 +607,14 @@ function renderGroups() {
 </div>
 <div class="form-group">
 	<label class="form-label">Parent Group</label>
-	<select class="form-select" data-bind="groups.${i}.parentId" data-empty-undefined>
+	<select class="form-select" data-bind="groups.${i}.parentId" data-empty-undefined data-rerender="groups">
 		<option value="">None</option>
 		${parentOptions}
 	</select>
 </div>
 <div class="form-group">
 	<label class="form-label">Notification Channels</label>
-	${renderTagsInput(`grp-nc-${i}`, g.notificationChannels || [], "groups", i, "notificationChannels")}
+	${renderMultiSelect(`grp-nc-${i}`, g.notificationChannels || [], "groups", i, "notificationChannels")}
 </div>
 </div>
 </div>`;
@@ -508,6 +624,7 @@ function renderGroups() {
 }
 
 function addStatusPage() {
+	flushBindings(document.getElementById("statuspages-list"));
 	config.status_pages.push({
 		id: uid(),
 		name: "",
@@ -519,6 +636,7 @@ function addStatusPage() {
 }
 
 function removeStatusPage(idx) {
+	flushBindings(document.getElementById("statuspages-list"));
 	config.status_pages.splice(idx, 1);
 	renderStatusPages();
 	updateBadges();
@@ -526,6 +644,7 @@ function removeStatusPage(idx) {
 
 function renderStatusPages() {
 	const container = document.getElementById("statuspages-list");
+
 	if (config.status_pages.length === 0) {
 		container.innerHTML = `
 <div class="empty-state">
@@ -570,7 +689,7 @@ function renderStatusPages() {
 </div>
 <div class="form-group full-width">
 	<label class="form-label">Items (Monitor/Group IDs) <span class="required">*</span></label>
-	${renderTagsInput(`sp-items-${i}`, sp.items || [], "status_pages", i, "items")}
+	${renderMultiSelect(`sp-items-${i}`, sp.items || [], "status_pages", i, "items")}
 </div>
 </div>
 </div>
@@ -582,6 +701,7 @@ function renderStatusPages() {
 }
 
 function addNotificationChannel() {
+	flushBindings(document.getElementById("notifications-list"));
 	const id = uid();
 	if (!config.notifications) config.notifications = { channels: {} };
 	if (!config.notifications.channels) config.notifications.channels = {};
@@ -595,13 +715,28 @@ function addNotificationChannel() {
 }
 
 function removeNotificationChannel(key) {
+	flushBindings(document.getElementById("notifications-list"));
+	const removed = config.notifications?.channels?.[key];
+	const removedId = removed?.id || key;
+
 	delete config.notifications.channels[key];
+
+	pruneNotificationChannelRefs(removedId, key);
+
+	const ml = document.getElementById("monitors-list");
+	const gl = document.getElementById("groups-list");
+	if (ml) flushBindings(ml);
+	if (gl) flushBindings(gl);
+
 	renderNotifications();
+	renderGroups();
+	renderMonitors();
 	updateBadges();
 }
 
 function renderNotifications() {
 	const container = document.getElementById("notifications-list");
+
 	const channels = config.notifications?.channels || {};
 	const keys = Object.keys(channels);
 
@@ -796,6 +931,7 @@ function renderNotifications() {
 }
 
 function addPulseMonitor() {
+	flushBindings(document.getElementById("pulsemonitors-list"));
 	config.PulseMonitors.push({
 		id: uid(),
 		name: "",
@@ -806,6 +942,7 @@ function addPulseMonitor() {
 }
 
 function removePulseMonitor(idx) {
+	flushBindings(document.getElementById("pulsemonitors-list"));
 	config.PulseMonitors.splice(idx, 1);
 	renderPulseMonitors();
 	updateBadges();
@@ -813,6 +950,7 @@ function removePulseMonitor(idx) {
 
 function renderPulseMonitors() {
 	const container = document.getElementById("pulsemonitors-list");
+
 	if (config.PulseMonitors.length === 0) {
 		container.innerHTML = `
 <div class="empty-state">
@@ -856,17 +994,70 @@ function renderPulseMonitors() {
 	bindDynamicEvents(container);
 }
 
-function renderTagsInput(id, values, section, idx, prop) {
-	const tags = (values || [])
-		.map(
-			(v) =>
-				`<span class="tag">${esc(v)}<button class="tag-remove" data-action="remove-tag" data-section="${section}" data-idx="${idx}" data-prop="${prop}" data-value="${esc(v)}">&times;</button></span>`,
-		)
+function getAvailableOptions(optionType) {
+	switch (optionType) {
+		case "notificationChannels": {
+			const channels = config.notifications?.channels || {};
+			return Object.keys(channels).map((key) => {
+				const ch = channels[key];
+				return { value: ch.id || key, label: ch.name ? `${ch.name} (${ch.id || key})` : ch.id || key };
+			});
+		}
+		case "pulseMonitors": {
+			return config.PulseMonitors.filter((pm) => pm.id).map((pm) => ({
+				value: pm.id,
+				label: pm.name ? `${pm.name} (${pm.id})` : pm.id,
+			}));
+		}
+		case "items": {
+			const monitorOpts = config.monitors
+				.filter((m) => m.id)
+				.map((m) => ({
+					value: m.id,
+					label: `${m.name || m.id} (monitor)`,
+				}));
+			const groupOpts = config.groups
+				.filter((g) => g.id)
+				.map((g) => ({
+					value: g.id,
+					label: `${g.name || g.id} (group)`,
+				}));
+			return [...groupOpts, ...monitorOpts];
+		}
+		default:
+			return [];
+	}
+}
+
+function renderMultiSelect(id, selectedValues, section, idx, prop) {
+	const options = getAvailableOptions(prop);
+	const selected = selectedValues || [];
+
+	const selectedTags = selected
+		.map((v) => {
+			const opt = options.find((o) => o.value === v);
+			const displayLabel = opt ? opt.label : v;
+			return `<span class="tag">${esc(displayLabel)}<button class="tag-remove" data-action="remove-tag" data-section="${section}" data-idx="${idx}" data-prop="${prop}" data-value="${esc(v)}">&times;</button></span>`;
+		})
 		.join("");
-	return `<div class="tags-display" data-action="focus-tag-input">
-${tags}
-<input class="tags-input" type="text" placeholder="Type and press Enter" id="${id}"
-data-action="tag-keydown" data-section="${section}" data-idx="${idx}" data-prop="${prop}" />
+
+	const availableOptions = options.filter((o) => !selected.includes(o.value));
+	const hasOptions = availableOptions.length > 0;
+	const placeholderText =
+		!hasOptions && options.length === 0
+			? `No ${prop === "notificationChannels" ? "notification channels" : prop === "pulseMonitors" ? "PulseMonitor agents" : "monitors/groups"} defined`
+			: !hasOptions
+				? "All options selected"
+				: "Select to add...";
+
+	const optionsHtml = availableOptions.map((o) => `<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
+
+	return `<div class="multi-select-container">
+<div class="multi-select-tags">${selectedTags}</div>
+<select class="form-select multi-select-dropdown" data-action="add-from-select" data-section="${section}" data-idx="${idx}" data-prop="${prop}" id="${id}" ${!hasOptions ? "disabled" : ""}>
+	<option value="">${placeholderText}</option>
+	${optionsHtml}
+</select>
 </div>`;
 }
 
@@ -885,13 +1076,39 @@ function removeTag(section, idx, prop, value) {
 
 function reRenderSection(section) {
 	if (section === "monitors") renderMonitors();
-	else if (section === "groups") renderGroups();
-	else if (section === "status_pages") renderStatusPages();
+	else if (section === "groups") {
+		// Keep monitor edits and refresh group dropdown options
+		const ml = document.getElementById("monitors-list");
+		if (ml) flushBindings(ml);
+		renderGroups();
+		renderMonitors();
+	} else if (section === "status_pages") renderStatusPages();
+}
+
+function pruneEmptyCustomMetrics(cfg) {
+	for (const m of cfg.monitors || []) {
+		for (let n = 1; n <= 3; n++) {
+			const key = `custom${n}`;
+			const cm = m[key];
+
+			if (!cm) continue;
+
+			if (!cm.id || String(cm.id).trim() === "") {
+				delete m[key];
+				continue;
+			}
+		}
+	}
 }
 
 function exportConfig() {
-	readGeneralFromUI();
-	const toml = TOML.stringify(config);
+	flushActiveTabEdits();
+
+	const toExport = structuredClone(config);
+
+	pruneEmptyCustomMetrics(toExport);
+
+	const toml = TOML.stringify(toExport);
 
 	const blob = new Blob([toml], { type: "text/plain" });
 	const url = URL.createObjectURL(blob);
@@ -1157,30 +1374,19 @@ function bindDynamicEvents(container) {
 		el.addEventListener("change", () => handleBind(el));
 	});
 
-	// Focus tag input when clicking tags-display area
-	container.querySelectorAll('[data-action="focus-tag-input"]').forEach((el) => {
-		el.addEventListener("click", () => {
-			const input = el.querySelector("input");
-			if (input) input.focus();
-		});
-	});
-
-	// Enter key to add tag
-	container.querySelectorAll('[data-action="tag-keydown"]').forEach((el) => {
-		el.addEventListener("keydown", (e) => {
-			if (e.key === "Enter") {
-				e.preventDefault();
-				const val = el.value.trim();
-				if (!val) return;
-				addTag(el.dataset.section, el.dataset.idx, el.dataset.prop, val);
-			}
+	// Multi-select dropdown: add value on selection
+	container.querySelectorAll('[data-action="add-from-select"]').forEach((el) => {
+		el.addEventListener("change", () => {
+			const val = el.value;
+			if (!val) return;
+			addTag(el.dataset.section, Number(el.dataset.idx), el.dataset.prop, val);
 		});
 	});
 
 	// Remove tag buttons
 	container.querySelectorAll('[data-action="remove-tag"]').forEach((el) => {
 		el.addEventListener("click", () => {
-			removeTag(el.dataset.section, el.dataset.idx, el.dataset.prop, el.dataset.value);
+			removeTag(el.dataset.section, Number(el.dataset.idx), el.dataset.prop, el.dataset.value);
 		});
 	});
 
@@ -1191,11 +1397,24 @@ function bindDynamicEvents(container) {
 		});
 	});
 
-	// Update notification channel ID
+	// Update notification channel ID (and keep references in sync)
 	container.querySelectorAll('[data-action="update-channel-id"]').forEach((el) => {
 		el.addEventListener("change", () => {
 			const ch = config.notifications.channels[el.dataset.key];
-			if (ch) ch.id = el.value;
+			if (!ch) return;
+			const oldId = ch.id || el.dataset.key;
+			const newId = el.value;
+			ch.id = newId;
+			replaceNotificationChannelRefs(oldId, newId);
+
+			// Refresh dependent UIs (preserve edits first)
+			const ml = document.getElementById("monitors-list");
+			const gl = document.getElementById("groups-list");
+			if (ml) flushBindings(ml);
+			if (gl) flushBindings(gl);
+			renderMonitors();
+			renderGroups();
+			updateBadges();
 		});
 	});
 }
@@ -1203,6 +1422,9 @@ function bindDynamicEvents(container) {
 document.body.addEventListener("click", (e) => {
 	const btn = e.target.closest("[data-action]");
 	if (!btn) return;
+	// Prevent accidental form submissions / navigation when buttons live inside other clickable areas
+	e.preventDefault();
+	e.stopPropagation();
 
 	const action = btn.dataset.action;
 	const idx = btn.dataset.idx !== undefined ? Number(btn.dataset.idx) : undefined;

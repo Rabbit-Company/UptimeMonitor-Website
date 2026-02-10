@@ -567,23 +567,6 @@ a:hover {
 	font-weight: 600;
 	color: var(--text-secondary);
 }
-
-.tags-display {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 6px;
-	padding: 8px 12px;
-	min-height: 42px;
-	align-items: center;
-	background: var(--bg-elevated);
-	border: 1px solid var(--border-subtle);
-	border-radius: 8px;
-	cursor: text;
-}
-.tags-display:focus-within {
-	border-color: var(--accent-primary);
-	box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
 .tag {
 	display: inline-flex;
 	align-items: center;
@@ -609,18 +592,26 @@ a:hover {
 .tag-remove:hover {
 	opacity: 1;
 }
-.tags-input {
-	border: none;
-	background: none;
-	outline: none;
-	color: var(--text-primary);
-	font-size: 0.85rem;
-	font-family: inherit;
-	flex: 1;
-	min-width: 100px;
+
+.multi-select-container {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
 }
-.tags-input::placeholder {
-	color: var(--text-subtle);
+.multi-select-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+.multi-select-tags:empty {
+	display: none;
+}
+.multi-select-dropdown {
+	width: 100%;
+}
+.multi-select-dropdown:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
 }
 
 .collapsible-trigger {
