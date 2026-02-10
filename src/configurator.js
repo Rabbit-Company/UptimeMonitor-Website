@@ -340,7 +340,13 @@ function renderMonitors() {
 }
 
 function renderMonitorCard(m, idx) {
-	const groupOptions = config.groups.map((g) => `<option value="${g.id}" ${m.groupId === g.id ? "selected" : ""}>${g.name || g.id}</option>`).join("");
+	const groupOptions = config.groups
+		.filter((g) => g.id)
+		.map((g) => {
+			const label = g.name ? `${g.name} (${g.id})` : g.id;
+			return `<option value="${g.id}" ${m.groupId === g.id ? "selected" : ""}>${esc(label)}</option>`;
+		})
+		.join("");
 	const pulseProtocols = ["http", "ws", "tcp", "udp", "icmp", "smtp", "imap", "mysql", "mssql", "postgresql", "redis"];
 	const currentProtocol = m.pulse ? Object.keys(m.pulse)[0] || "" : "";
 
@@ -582,7 +588,10 @@ function renderGroups() {
 		.map((g, i) => {
 			const parentOptions = config.groups
 				.filter((_, j) => j !== i)
-				.map((p) => `<option value="${p.id}" ${g.parentId === p.id ? "selected" : ""}>${p.name || p.id}</option>`)
+				.map((p) => {
+					const label = p.name ? `${p.name} (${p.id})` : p.id;
+					return `<option value="${p.id}" ${g.parentId === p.id ? "selected" : ""}>${esc(label)}</option>`;
+				})
 				.join("");
 			return `
 <div class="config-card">
@@ -1049,14 +1058,16 @@ function getAvailableOptions(optionType) {
 				.filter((m) => m.id)
 				.map((m) => ({
 					value: m.id,
-					label: `${m.name || m.id} (monitor)`,
+					label: m.name ? `${m.name} (${m.id})` : m.id,
 				}));
+
 			const groupOpts = config.groups
 				.filter((g) => g.id)
 				.map((g) => ({
 					value: g.id,
-					label: `${g.name || g.id} (group)`,
+					label: g.name ? `${g.name} (${g.id})` : g.id,
 				}));
+
 			return [...groupOpts, ...monitorOpts];
 		}
 		default:
