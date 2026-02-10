@@ -112,6 +112,27 @@ function pruneNotificationChannelRefs(...ids) {
 	}
 }
 
+function prunePulseMonitorRefs(...ids) {
+	const removeSet = new Set(ids.filter(Boolean));
+	if (removeSet.size === 0) return;
+
+	// Monitors
+	for (const m of config.monitors || []) {
+		if (Array.isArray(m.pulseMonitors)) {
+			m.pulseMonitors = m.pulseMonitors.filter((v) => !removeSet.has(v));
+			if (m.pulseMonitors.length === 0) delete m.pulseMonitors;
+		}
+	}
+
+	// Groups (in case the schema supports it now or later)
+	for (const g of config.groups || []) {
+		if (Array.isArray(g.pulseMonitors)) {
+			g.pulseMonitors = g.pulseMonitors.filter((v) => !removeSet.has(v));
+			if (g.pulseMonitors.length === 0) delete g.pulseMonitors;
+		}
+	}
+}
+
 function replaceNotificationChannelRefs(oldId, newId) {
 	if (!oldId || !newId || oldId === newId) return;
 	const replace = (arr) => arr.map((v) => (v === oldId ? newId : v));
@@ -943,8 +964,22 @@ function addPulseMonitor() {
 
 function removePulseMonitor(idx) {
 	flushBindings(document.getElementById("pulsemonitors-list"));
+
+	const ml = document.getElementById("monitors-list");
+	const gl = document.getElementById("groups-list");
+	if (ml) flushBindings(ml);
+	if (gl) flushBindings(gl);
+
+	const removed = config.PulseMonitors?.[idx];
+	const removedId = removed?.id;
+
 	config.PulseMonitors.splice(idx, 1);
+
+	prunePulseMonitorRefs(removedId);
+
 	renderPulseMonitors();
+	renderMonitors();
+	renderGroups();
 	updateBadges();
 }
 
