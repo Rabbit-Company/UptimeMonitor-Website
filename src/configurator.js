@@ -133,6 +133,27 @@ function prunePulseMonitorRefs(...ids) {
 	}
 }
 
+function pruneDependencyRefs(...ids) {
+	const removeSet = new Set(ids.filter(Boolean));
+	if (removeSet.size === 0) return;
+
+	// Monitors
+	for (const m of config.monitors || []) {
+		if (Array.isArray(m.dependencies)) {
+			m.dependencies = m.dependencies.filter((v) => !removeSet.has(v));
+			if (m.dependencies.length === 0) delete m.dependencies;
+		}
+	}
+
+	// Groups
+	for (const g of config.groups || []) {
+		if (Array.isArray(g.dependencies)) {
+			g.dependencies = g.dependencies.filter((v) => !removeSet.has(v));
+			if (g.dependencies.length === 0) delete g.dependencies;
+		}
+	}
+}
+
 function replaceNotificationChannelRefs(oldId, newId) {
 	if (!oldId || !newId || oldId === newId) return;
 	const replace = (arr) => arr.map((v) => (v === oldId ? newId : v));
@@ -277,8 +298,12 @@ function addMonitor() {
 
 function removeMonitor(idx) {
 	flushBindings(document.getElementById("monitors-list"));
+	const removed = config.monitors[idx];
+	const removedId = removed?.id;
 	config.monitors.splice(idx, 1);
+	pruneDependencyRefs(removedId);
 	renderMonitors();
+	renderGroups();
 	updateBadges();
 }
 
@@ -404,6 +429,11 @@ ${renderMultiSelect(`mon-nc-${idx}`, m.notificationChannels || [], "monitors", i
 <div class="form-group">
 <label class="form-label">PulseMonitor Agents</label>
 ${renderMultiSelect(`mon-pm-${idx}`, m.pulseMonitors || [], "monitors", idx, "pulseMonitors")}
+</div>
+<div class="form-group">
+<label class="form-label">Dependencies</label>
+${renderMultiSelect(`mon-dep-${idx}`, m.dependencies || [], "monitors", idx, "dependencies")}
+<span class="form-hint">Suppress notifications when dependencies are down</span>
 </div>
 </div>
 
@@ -566,7 +596,10 @@ function addGroup() {
 
 function removeGroup(idx) {
 	flushBindings(document.getElementById("groups-list"));
+	const removed = config.groups[idx];
+	const removedId = removed?.id;
 	config.groups.splice(idx, 1);
+	pruneDependencyRefs(removedId);
 	renderGroups();
 	renderMonitors();
 	updateBadges();
@@ -645,6 +678,11 @@ function renderGroups() {
 <div class="form-group">
 	<label class="form-label">Notification Channels</label>
 	${renderMultiSelect(`grp-nc-${i}`, g.notificationChannels || [], "groups", i, "notificationChannels")}
+</div>
+<div class="form-group">
+	<label class="form-label">Dependencies</label>
+	${renderMultiSelect(`grp-dep-${i}`, g.dependencies || [], "groups", i, "dependencies")}
+	<span class="form-hint">Suppress notifications when dependencies are down</span>
 </div>
 </div>
 </div>`;
@@ -1053,6 +1091,23 @@ function getAvailableOptions(optionType) {
 				label: pm.name ? `${pm.name} (${pm.id})` : pm.id,
 			}));
 		}
+		case "dependencies": {
+			const depMonOpts = config.monitors
+				.filter((m) => m.id)
+				.map((m) => ({
+					value: m.id,
+					label: m.name ? `${m.name} (${m.id})` : m.id,
+				}));
+
+			const depGrpOpts = config.groups
+				.filter((g) => g.id)
+				.map((g) => ({
+					value: g.id,
+					label: g.name ? `${g.name} (${g.id})` : g.id,
+				}));
+
+			return [...depGrpOpts, ...depMonOpts];
+		}
 		case "items": {
 			const monitorOpts = config.monitors
 				.filter((m) => m.id)
@@ -1076,8 +1131,16 @@ function getAvailableOptions(optionType) {
 }
 
 function renderMultiSelect(id, selectedValues, section, idx, prop) {
-	const options = getAvailableOptions(prop);
+	let options = getAvailableOptions(prop);
 	const selected = selectedValues || [];
+
+	// Prevent self-dependencies: exclude the current entity's own ID
+	if (prop === "dependencies") {
+		const item = config[section]?.[idx];
+		if (item?.id) {
+			options = options.filter((o) => o.value !== item.id);
+		}
+	}
 
 	const selectedTags = selected
 		.map((v) => {
@@ -1091,7 +1154,7 @@ function renderMultiSelect(id, selectedValues, section, idx, prop) {
 	const hasOptions = availableOptions.length > 0;
 	const placeholderText =
 		!hasOptions && options.length === 0
-			? `No ${prop === "notificationChannels" ? "notification channels" : prop === "pulseMonitors" ? "PulseMonitor agents" : "monitors/groups"} defined`
+			? `No ${prop === "notificationChannels" ? "notification channels" : prop === "pulseMonitors" ? "PulseMonitor agents" : prop === "dependencies" ? "monitors/groups" : "monitors/groups"} defined`
 			: !hasOptions
 				? "All options selected"
 				: "Select to add...";
@@ -1229,6 +1292,7 @@ resendNotification = 12
 groupId = "production"
 notificationChannels = ["critical"]
 pulseMonitors = ["US-WEST-1", "EU-CENTRAL-1"]
+dependencies = ["db-primary", "redis-cache"]
 
 [monitors.pulse.http]
 method = "GET"
@@ -1297,6 +1361,7 @@ degradedThreshold = 50
 interval = 60
 resendNotification = 12
 notificationChannels = ["critical"]
+dependencies = ["infrastructure"]
 
 [[groups]]
 id = "infrastructure"
@@ -1544,6 +1609,7 @@ const EDGE_COLORS = {
 	"group-notification": "#f59e0b",
 	"group-parent": "#3b82f6",
 	"statuspage-item": "#8b5cf6",
+	dependency: "#ef4444",
 };
 
 function updateGraphFilterOptions() {
@@ -1596,6 +1662,17 @@ function buildGraphData() {
 				edges.push({ data: { source: nid, target: `pm-${pm}`, edgeType: "monitor-pulse" } });
 			}
 		}
+		if (m.dependencies) {
+			for (const dep of m.dependencies) {
+				const depMonTarget = `mon-${dep}`;
+				const depGrpTarget = `grp-${dep}`;
+				if (config.monitors.some((x) => x.id === dep)) {
+					edges.push({ data: { source: nid, target: depMonTarget, edgeType: "dependency" } });
+				} else {
+					edges.push({ data: { source: nid, target: depGrpTarget, edgeType: "dependency" } });
+				}
+			}
+		}
 	}
 
 	// 2. Groups
@@ -1613,6 +1690,17 @@ function buildGraphData() {
 		if (g.notificationChannels) {
 			for (const nc of g.notificationChannels) {
 				edges.push({ data: { source: nid, target: `ntf-${nc}`, edgeType: "group-notification" } });
+			}
+		}
+		if (g.dependencies) {
+			for (const dep of g.dependencies) {
+				const depMonTarget = `mon-${dep}`;
+				const depGrpTarget = `grp-${dep}`;
+				if (config.monitors.some((x) => x.id === dep)) {
+					edges.push({ data: { source: nid, target: depMonTarget, edgeType: "dependency" } });
+				} else {
+					edges.push({ data: { source: nid, target: depGrpTarget, edgeType: "dependency" } });
+				}
 			}
 		}
 	}
@@ -1772,6 +1860,13 @@ function renderGraph() {
 				style: {
 					"line-style": "dashed",
 					"target-arrow-shape": "none",
+				},
+			},
+			{
+				selector: 'edge[edgeType="dependency"]',
+				style: {
+					"line-style": "dashed",
+					"target-arrow-shape": "triangle",
 				},
 			},
 			...Object.entries(EDGE_COLORS).map(([type, color]) => ({
