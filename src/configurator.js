@@ -1192,6 +1192,7 @@ function reRenderSection(section) {
 		renderGroups();
 		renderMonitors();
 	} else if (section === "status_pages") renderStatusPages();
+	updateBadges();
 }
 
 function pruneEmptyCustomMetrics(cfg) {
@@ -1585,6 +1586,10 @@ document.body.addEventListener("click", (e) => {
 			break;
 		case "graph-fit":
 			if (cyInstance) cyInstance.fit(48);
+			break;
+		case "graph-refresh":
+			flushActiveTabEdits();
+			updateBadges();
 			break;
 		case "graph-reset":
 			renderGraph();
