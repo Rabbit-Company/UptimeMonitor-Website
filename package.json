@@ -1,7 +1,7 @@
 {
 	"name": "uptimemonitor-website",
 	"module": "src/index.js",
-	"version": "0.2.6",
+	"version": "0.2.7",
 	"type": "module",
 	"private": true,
 	"scripts": {
