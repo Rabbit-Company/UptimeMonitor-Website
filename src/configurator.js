@@ -8,6 +8,7 @@ cytoscape.use(dagre);
 let config = {
 	clickhouse: { url: "" },
 	server: {},
+	adminAPI: {},
 	logger: {},
 	missingPulseDetector: {},
 	selfMonitoring: {},
@@ -214,6 +215,7 @@ function parseTOML(text) {
 	if (!config.notifications) config.notifications = { channels: {} };
 	if (!config.notifications.channels) config.notifications.channels = {};
 	if (!config.PulseMonitors) config.PulseMonitors = [];
+	if (!config.adminAPI) config.adminAPI = {};
 	loadConfigToUI();
 }
 
@@ -229,6 +231,9 @@ function loadConfigToUI() {
 	document.getElementById("sm-interval").value = config.selfMonitoring?.interval || "";
 	document.getElementById("sm-backfill").checked = config.selfMonitoring?.backfillOnRecovery || false;
 	document.getElementById("sm-latencyStrategy").value = config.selfMonitoring?.latencyStrategy || "last-known";
+
+	document.getElementById("admin-enabled").checked = config.adminAPI?.enabled || false;
+	document.getElementById("admin-token").value = config.adminAPI?.token || "";
 
 	renderMonitors();
 	renderGroups();
@@ -249,36 +254,48 @@ function updateBadges() {
 
 function readGeneralFromUI() {
 	const url = document.getElementById("ch-url").value.trim();
-	config.clickhouse = { url };
+	config.clickhouse = {
+		url: url || "http://uptime_user:uptime_password@clickhouse:8123/uptime_monitor",
+	};
 
 	const port = document.getElementById("srv-port").value;
 	const proxy = document.getElementById("srv-proxy").value;
 	const reloadToken = document.getElementById("srv-reloadToken").value.trim();
-	config.server = {};
-	if (port) config.server.port = Number(port);
-	if (proxy) config.server.proxy = proxy;
-	if (reloadToken) config.server.reloadToken = reloadToken;
+	config.server = {
+		port: Number(port) || 3000,
+		proxy: proxy || "direct",
+		reloadToken: reloadToken || token(),
+	};
 
 	const logLevel = document.getElementById("log-level").value;
-	config.logger = {};
-	if (logLevel !== "") config.logger.level = Number(logLevel);
+	config.logger = {
+		level: Number(logLevel) || 3,
+	};
 
 	const mpdInterval = document.getElementById("mpd-interval").value;
-	config.missingPulseDetector = {};
-	if (mpdInterval) config.missingPulseDetector.interval = Number(mpdInterval);
+	config.missingPulseDetector = {
+		interval: Number(mpdInterval) || 5,
+	};
 
 	const smEnabled = document.getElementById("sm-enabled").checked;
 	const smId = document.getElementById("sm-id").value.trim();
 	const smInterval = document.getElementById("sm-interval").value;
 	const smBackfill = document.getElementById("sm-backfill").checked;
 	const smStrategy = document.getElementById("sm-latencyStrategy").value;
-	config.selfMonitoring = {};
-	if (smEnabled) config.selfMonitoring.enabled = true;
-	if (smId) config.selfMonitoring.id = smId;
-	if (smInterval) config.selfMonitoring.interval = Number(smInterval);
-	if (smBackfill) config.selfMonitoring.backfillOnRecovery = true;
-	if (smStrategy && smStrategy !== "last-known") config.selfMonitoring.latencyStrategy = smStrategy;
-	else if (smEnabled) config.selfMonitoring.latencyStrategy = smStrategy;
+	config.selfMonitoring = {
+		enabled: smEnabled,
+		id: smId || "self-monitor",
+		interval: Number(smInterval) || 3,
+		backfillOnRecovery: smBackfill,
+		latencyStrategy: smStrategy || "last-known",
+	};
+
+	const adminEnabled = document.getElementById("admin-enabled").checked;
+	const adminToken = document.getElementById("admin-token").value.trim();
+	config.adminAPI = {
+		enabled: adminEnabled,
+		token: adminToken || token(),
+	};
 }
 
 function addMonitor() {
@@ -1235,6 +1252,7 @@ function resetConfig() {
 	config = {
 		clickhouse: { url: "" },
 		server: {},
+		adminAPI: {},
 		logger: {},
 		missingPulseDetector: {},
 		selfMonitoring: {},
@@ -1257,6 +1275,10 @@ url = "http://uptime_user:uptime_password@clickhouse:8123/uptime_monitor"
 [server]
 port = 3000
 proxy = "direct"
+
+[adminAPI]
+enabled = false
+token = "admin_secret_token_example"
 
 [logger]
 level = 4
