@@ -389,7 +389,7 @@ function renderMonitorCard(m, idx) {
 			return `<option value="${g.id}" ${m.groupId === g.id ? "selected" : ""}>${esc(label)}</option>`;
 		})
 		.join("");
-	const pulseProtocols = ["http", "ws", "tcp", "udp", "icmp", "smtp", "imap", "mysql", "mssql", "postgresql", "redis"];
+	const pulseProtocols = ["http", "ws", "tcp", "udp", "icmp", "smtp", "imap", "mysql", "mssql", "postgresql", "redis", "minecraft-java", "minecraft-bedrock"];
 	const currentProtocol = m.pulse ? Object.keys(m.pulse)[0] || "" : "";
 
 	return `
@@ -525,50 +525,60 @@ function renderPulseFields(idx, pulse) {
 	const fields = {
 		http: [
 			{ key: "method", label: "Method", type: "select", options: ["GET", "POST", "HEAD"], val: p.method },
-			{ key: "url", label: "URL", type: "text", val: p.url, full: true },
-			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout },
+			{ key: "url", label: "URL", type: "text", val: p.url },
+			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout || 10 },
 		],
 		ws: [
-			{ key: "url", label: "URL", type: "text", val: p.url, full: true },
-			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout },
+			{ key: "url", label: "URL", type: "text", val: p.url },
+			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout || 3 },
 		],
 		tcp: [
 			{ key: "host", label: "Host", type: "text", val: p.host },
 			{ key: "port", label: "Port", type: "number", val: p.port },
-			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout },
+			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout || 5 },
 		],
 		udp: [
 			{ key: "host", label: "Host", type: "text", val: p.host },
 			{ key: "port", label: "Port", type: "number", val: p.port },
-			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout },
+			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout || 3 },
 			{ key: "payload", label: "Payload", type: "text", val: p.payload },
 		],
 		icmp: [
 			{ key: "host", label: "Host", type: "text", val: p.host },
-			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout },
+			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout || 3 },
 		],
 		smtp: [{ key: "url", label: "URL", type: "text", val: p.url, full: true }],
 		imap: [
 			{ key: "server", label: "Server", type: "text", val: p.server },
-			{ key: "port", label: "Port", type: "number", val: p.port },
+			{ key: "port", label: "Port", type: "number", val: p.port || 993 },
 			{ key: "username", label: "Username", type: "text", val: p.username },
 			{ key: "password", label: "Password", type: "text", val: p.password },
 		],
 		mysql: [
-			{ key: "url", label: "URL", type: "text", val: p.url, full: true },
-			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout },
+			{ key: "url", label: "URL", type: "text", val: p.url },
+			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout || 3 },
 		],
 		mssql: [
-			{ key: "url", label: "URL", type: "text", val: p.url, full: true },
-			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout },
+			{ key: "url", label: "URL", type: "text", val: p.url },
+			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout || 3 },
 		],
 		postgresql: [
-			{ key: "url", label: "URL", type: "text", val: p.url, full: true },
-			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout },
+			{ key: "url", label: "URL", type: "text", val: p.url },
+			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout || 3 },
 		],
 		redis: [
-			{ key: "url", label: "URL", type: "text", val: p.url, full: true },
-			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout },
+			{ key: "url", label: "URL", type: "text", val: p.url },
+			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout || 3 },
+		],
+		"minecraft-java": [
+			{ key: "host", label: "Host", type: "text", val: p.host },
+			{ key: "port", label: "Port", type: "number", val: p.port || 25565 },
+			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout || 3 },
+		],
+		"minecraft-bedrock": [
+			{ key: "host", label: "Host", type: "text", val: p.host },
+			{ key: "port", label: "Port", type: "number", val: p.port || 19132 },
+			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout || 3 },
 		],
 	};
 
