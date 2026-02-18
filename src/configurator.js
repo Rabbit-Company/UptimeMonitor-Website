@@ -361,6 +361,27 @@ function flushBindings(container) {
 			parent[key] = value;
 		}
 	});
+	// Flush webhook headers textareas
+	container.querySelectorAll('[data-action="webhook-headers"]').forEach((el) => {
+		const key = el.dataset.key;
+		ensurePath(`notifications.channels.${key}.webhook`);
+		const headers = {};
+		el.value
+			.split("\n")
+			.map((l) => l.trim())
+			.filter(Boolean)
+			.forEach((line) => {
+				const sep = line.indexOf(":");
+				if (sep > 0) {
+					headers[line.slice(0, sep).trim()] = line.slice(sep + 1).trim();
+				}
+			});
+		if (Object.keys(headers).length > 0) {
+			config.notifications.channels[key].webhook.headers = headers;
+		} else {
+			delete config.notifications.channels[key].webhook.headers;
+		}
+	});
 	isFlushing = false;
 }
 
@@ -840,7 +861,7 @@ function renderNotifications() {
 <div class="empty-state">
 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
 <h3>No Notification Channels</h3>
-<p>Configure Discord, Email, Ntfy, or Telegram notifications.</p>
+<p>Configure Discord, Email, Ntfy, Telegram or Webhook notifications.</p>
 </div>`;
 		return;
 	}
@@ -1010,13 +1031,43 @@ function renderNotifications() {
 	<label class="form-label">Topic ID</label>
 	<input class="form-input" type="number" value="${ch.telegram?.topicId ?? ""}"
 		data-bind="notifications.channels.${key}.telegram.topicId" data-type="number" data-ensure="notifications.channels.${key}.telegram" data-empty-undefined />
-	<span class="form-hint">Optional — for forum groups with topics</span>
+	<span class="form-hint">Optional - for forum groups with topics</span>
 </div>
 <div class="form-group">
 	<label class="form-check">
 		<input type="checkbox" ${ch.telegram?.disableNotification ? "checked" : ""} data-bind="notifications.channels.${key}.telegram.disableNotification" data-type="boolean" data-ensure="notifications.channels.${key}.telegram" data-empty-undefined />
 		<span class="form-check-label">Send silently (no notification sound)</span>
 	</label>
+</div>
+</div>
+
+<!-- Webhook -->
+<hr class="form-divider"/>
+<div class="form-section-title">Webhook</div>
+<div class="form-grid">
+<div class="form-group">
+	<label class="form-check">
+		<input type="checkbox" ${ch.webhook?.enabled ? "checked" : ""} data-bind="notifications.channels.${key}.webhook.enabled" data-type="boolean" data-ensure="notifications.channels.${key}.webhook" />
+		<span class="form-check-label">Enable Webhook</span>
+	</label>
+</div>
+<div class="form-group full-width">
+	<label class="form-label">URL</label>
+	<input class="form-input mono" type="text" value="${esc(ch.webhook?.url || "")}" placeholder="https://example.com/webhook"
+		data-bind="notifications.channels.${key}.webhook.url" data-ensure="notifications.channels.${key}.webhook" />
+	<span class="form-hint">Notifications are sent as JSON POST requests</span>
+</div>
+<div class="form-group full-width">
+	<label class="form-label">Custom Headers (one per line, format: Header: Value)</label>
+	<textarea class="form-input mono" rows="3" placeholder="Authorization: Bearer your-token&#10;X-Api-Key: your-key"
+		data-action="webhook-headers" data-key="${key}">${
+			ch.webhook?.headers
+				? Object.entries(ch.webhook.headers)
+						.map(([k, v]) => k + ": " + v)
+						.join("\n")
+				: ""
+		}</textarea>
+	<span class="form-hint">Optional - use for authentication</span>
 </div>
 </div>
 </div>`;
@@ -1238,12 +1289,25 @@ function pruneEmptyCustomMetrics(cfg) {
 	}
 }
 
+function pruneDisabledProviders(cfg) {
+	const providers = ["discord", "email", "ntfy", "telegram", "webhook"];
+	const channels = cfg.notifications?.channels || {};
+	for (const ch of Object.values(channels)) {
+		for (const provider of providers) {
+			if (ch[provider] && !ch[provider].enabled) {
+				delete ch[provider];
+			}
+		}
+	}
+}
+
 function exportConfig() {
 	flushActiveTabEdits();
 
 	const toExport = structuredClone(config);
 
 	pruneEmptyCustomMetrics(toExport);
+	pruneDisabledProviders(toExport);
 
 	const toml = TOML.stringify(toExport);
 
@@ -1457,6 +1521,13 @@ topic = "my-uptime-alerts"
 enabled = true
 botToken = "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
 chatId = "-1001234567890"
+
+[notifications.channels.ops-team.webhook]
+enabled = true
+url = "https://example.com/alerts/webhook"
+
+[notifications.channels.ops-team.webhook.headers]
+Authorization = "Bearer your-secret-token"
 `;
 	parseTOML(example);
 	showToast("Example configuration loaded!");
@@ -1538,6 +1609,30 @@ function bindDynamicEvents(container) {
 	container.querySelectorAll('[data-action="set-pulse-protocol"]').forEach((el) => {
 		el.addEventListener("change", () => {
 			setPulseProtocol(Number(el.dataset.idx), el.value);
+		});
+	});
+
+	// Webhook headers textarea: parse "Key: Value" lines into an object
+	container.querySelectorAll('[data-action="webhook-headers"]').forEach((el) => {
+		el.addEventListener("change", () => {
+			const key = el.dataset.key;
+			ensurePath(`notifications.channels.${key}.webhook`);
+			const headers = {};
+			el.value
+				.split("\n")
+				.map((l) => l.trim())
+				.filter(Boolean)
+				.forEach((line) => {
+					const sep = line.indexOf(":");
+					if (sep > 0) {
+						headers[line.slice(0, sep).trim()] = line.slice(sep + 1).trim();
+					}
+				});
+			if (Object.keys(headers).length > 0) {
+				config.notifications.channels[key].webhook.headers = headers;
+			} else {
+				delete config.notifications.channels[key].webhook.headers;
+			}
 		});
 	});
 
