@@ -155,6 +155,27 @@ function pruneDependencyRefs(...ids) {
 	}
 }
 
+function pruneChildrenRefs(...ids) {
+	const removeSet = new Set(ids.filter(Boolean));
+	if (removeSet.size === 0) return;
+
+	// Monitors
+	for (const m of config.monitors || []) {
+		if (Array.isArray(m.children)) {
+			m.children = m.children.filter((v) => !removeSet.has(v));
+			if (m.children.length === 0) delete m.children;
+		}
+	}
+
+	// Groups
+	for (const g of config.groups || []) {
+		if (Array.isArray(g.children)) {
+			g.children = g.children.filter((v) => !removeSet.has(v));
+			if (g.children.length === 0) delete g.children;
+		}
+	}
+}
+
 function replaceNotificationChannelRefs(oldId, newId) {
 	if (!oldId || !newId || oldId === newId) return;
 	const replace = (arr) => arr.map((v) => (v === oldId ? newId : v));
@@ -319,6 +340,7 @@ function removeMonitor(idx) {
 	const removedId = removed?.id;
 	config.monitors.splice(idx, 1);
 	pruneDependencyRefs(removedId);
+	pruneChildrenRefs(removedId);
 	renderMonitors();
 	renderGroups();
 	updateBadges();
@@ -403,13 +425,6 @@ function renderMonitors() {
 }
 
 function renderMonitorCard(m, idx) {
-	const groupOptions = config.groups
-		.filter((g) => g.id)
-		.map((g) => {
-			const label = g.name ? `${g.name} (${g.id})` : g.id;
-			return `<option value="${g.id}" ${m.groupId === g.id ? "selected" : ""}>${esc(label)}</option>`;
-		})
-		.join("");
 	const pulseProtocols = ["http", "ws", "tcp", "udp", "icmp", "smtp", "imap", "mysql", "mssql", "postgresql", "redis", "minecraft-java", "minecraft-bedrock"];
 	const currentProtocol = m.pulse ? Object.keys(m.pulse)[0] || "" : "";
 
@@ -454,11 +469,9 @@ function renderMonitorCard(m, idx) {
 <span class="form-hint">0 = never resend</span>
 </div>
 <div class="form-group">
-<label class="form-label">Group</label>
-<select class="form-select" data-bind="monitors.${idx}.groupId" data-empty-undefined>
-	<option value="">None</option>
-	${groupOptions}
-</select>
+<label class="form-label">Children</label>
+${renderMultiSelect(`mon-ch-${idx}`, m.children || [], "monitors", idx, "children")}
+<span class="form-hint">Child monitors/groups held by this monitor</span>
 </div>
 <div class="form-group">
 <label class="form-label">Notification Channels</label>
@@ -648,6 +661,7 @@ function removeGroup(idx) {
 	const removedId = removed?.id;
 	config.groups.splice(idx, 1);
 	pruneDependencyRefs(removedId);
+	pruneChildrenRefs(removedId);
 	renderGroups();
 	renderMonitors();
 	updateBadges();
@@ -667,13 +681,6 @@ function renderGroups() {
 	}
 	container.innerHTML = config.groups
 		.map((g, i) => {
-			const parentOptions = config.groups
-				.filter((_, j) => j !== i)
-				.map((p) => {
-					const label = p.name ? `${p.name} (${p.id})` : p.id;
-					return `<option value="${p.id}" ${g.parentId === p.id ? "selected" : ""}>${esc(label)}</option>`;
-				})
-				.join("");
 			return `
 <div class="config-card">
 <div class="config-card-header">
@@ -717,11 +724,9 @@ function renderGroups() {
 	<input class="form-input" type="number" value="${g.resendNotification ?? ""}" min="0" data-bind="groups.${i}.resendNotification" data-type="number" />
 </div>
 <div class="form-group">
-	<label class="form-label">Parent Group</label>
-	<select class="form-select" data-bind="groups.${i}.parentId" data-empty-undefined data-rerender="groups">
-		<option value="">None</option>
-		${parentOptions}
-	</select>
+	<label class="form-label">Children</label>
+	${renderMultiSelect(`grp-ch-${i}`, g.children || [], "groups", i, "children")}
+	<span class="form-hint">Child monitors/groups held by this group</span>
 </div>
 <div class="form-group">
 	<label class="form-label">Notification Channels</label>
@@ -1169,6 +1174,7 @@ function getAvailableOptions(optionType) {
 				label: pm.name ? `${pm.name} (${pm.id})` : pm.id,
 			}));
 		}
+		case "children":
 		case "dependencies": {
 			const depMonOpts = config.monitors
 				.filter((m) => m.id)
@@ -1212,8 +1218,8 @@ function renderMultiSelect(id, selectedValues, section, idx, prop) {
 	let options = getAvailableOptions(prop);
 	const selected = selectedValues || [];
 
-	// Prevent self-dependencies: exclude the current entity's own ID
-	if (prop === "dependencies") {
+	// Prevent self-references: exclude the current entity's own ID
+	if (prop === "dependencies" || prop === "children") {
 		const item = config[section]?.[idx];
 		if (item?.id) {
 			options = options.filter((o) => o.value !== item.id);
@@ -1232,7 +1238,7 @@ function renderMultiSelect(id, selectedValues, section, idx, prop) {
 	const hasOptions = availableOptions.length > 0;
 	const placeholderText =
 		!hasOptions && options.length === 0
-			? `No ${prop === "notificationChannels" ? "notification channels" : prop === "pulseMonitors" ? "PulseMonitor agents" : prop === "dependencies" ? "monitors/groups" : "monitors/groups"} defined`
+			? `No ${prop === "notificationChannels" ? "notification channels" : prop === "pulseMonitors" ? "PulseMonitor agents" : prop === "dependencies" || prop === "children" ? "monitors/groups" : "monitors/groups"} defined`
 			: !hasOptions
 				? "All options selected"
 				: "Select to add...";
@@ -1386,7 +1392,6 @@ token = "tk_prod_api_abc123"
 interval = 30
 maxRetries = 2
 resendNotification = 12
-groupId = "production"
 notificationChannels = ["critical"]
 pulseMonitors = ["US-WEST-1", "EU-CENTRAL-1"]
 dependencies = ["db-primary", "redis-cache"]
@@ -1403,7 +1408,6 @@ token = "tk_game_server"
 interval = 10
 maxRetries = 0
 resendNotification = 0
-groupId = "production"
 
 [monitors.custom1]
 id = "players"
@@ -1427,7 +1431,6 @@ token = "tk_db_primary"
 interval = 15
 maxRetries = 1
 resendNotification = 6
-groupId = "infrastructure"
 notificationChannels = ["critical"]
 pulseMonitors = ["US-WEST-1"]
 
@@ -1442,7 +1445,6 @@ token = "tk_redis"
 interval = 10
 maxRetries = 0
 resendNotification = 0
-groupId = "infrastructure"
 pulseMonitors = ["US-WEST-1"]
 
 [monitors.pulse.redis]
@@ -1457,6 +1459,7 @@ strategy = "percentage"
 degradedThreshold = 50
 interval = 60
 resendNotification = 12
+children = ["api-prod", "game-server"]
 notificationChannels = ["critical"]
 dependencies = ["infrastructure"]
 
@@ -1467,6 +1470,7 @@ strategy = "all-up"
 degradedThreshold = 0
 interval = 60
 resendNotification = 6
+children = ["db-primary", "redis-cache"]
 notificationChannels = ["critical", "ops-team"]
 
 # Status Pages
@@ -1735,11 +1739,10 @@ const NODE_COLORS = {
 };
 
 const EDGE_COLORS = {
-	"monitor-group": "#3b82f6",
+	"parent-child": "#3b82f6",
 	"monitor-notification": "#f59e0b",
 	"monitor-pulse": "#06b6d4",
 	"group-notification": "#f59e0b",
-	"group-parent": "#3b82f6",
 	"statuspage-item": "#8b5cf6",
 	dependency: "#ef4444",
 };
@@ -1780,9 +1783,16 @@ function buildGraphData() {
 		nodes.push({ data: { id: nid, label: m.name || m.id, type: "monitor" } });
 		nodeIds.add(nid);
 
-		if (m.groupId) {
-			// DIRECTION FIX: Group (Parent) -> Monitor (Child)
-			edges.push({ data: { source: `grp-${m.groupId}`, target: nid, edgeType: "monitor-group" } });
+		if (m.children) {
+			for (const childId of m.children) {
+				const childMonTarget = `mon-${childId}`;
+				const childGrpTarget = `grp-${childId}`;
+				if (config.monitors.some((x) => x.id === childId)) {
+					edges.push({ data: { source: nid, target: childMonTarget, edgeType: "parent-child" } });
+				} else {
+					edges.push({ data: { source: nid, target: childGrpTarget, edgeType: "parent-child" } });
+				}
+			}
 		}
 		if (m.notificationChannels) {
 			for (const nc of m.notificationChannels) {
@@ -1815,9 +1825,16 @@ function buildGraphData() {
 			nodes.push({ data: { id: nid, label: g.name || g.id, type: "group" } });
 			nodeIds.add(nid);
 		}
-		if (g.parentId) {
-			// DIRECTION FIX: Parent Group -> Child Group
-			edges.push({ data: { source: `grp-${g.parentId}`, target: nid, edgeType: "group-parent" } });
+		if (g.children) {
+			for (const childId of g.children) {
+				const childMonTarget = `mon-${childId}`;
+				const childGrpTarget = `grp-${childId}`;
+				if (config.monitors.some((x) => x.id === childId)) {
+					edges.push({ data: { source: nid, target: childMonTarget, edgeType: "parent-child" } });
+				} else {
+					edges.push({ data: { source: nid, target: childGrpTarget, edgeType: "parent-child" } });
+				}
+			}
 		}
 		if (g.notificationChannels) {
 			for (const nc of g.notificationChannels) {
@@ -1988,10 +2005,10 @@ function renderGraph() {
 				},
 			},
 			{
-				selector: 'edge[edgeType="monitor-group"], edge[edgeType="group-parent"]',
+				selector: 'edge[edgeType="parent-child"]',
 				style: {
 					"line-style": "dashed",
-					"target-arrow-shape": "none",
+					"target-arrow-shape": "triangle",
 				},
 			},
 			{
