@@ -469,7 +469,6 @@
 <span class="key">interval</span> = <span class="number">30</span>
 <span class="key">maxRetries</span> = <span class="number">2</span>
 <span class="key">resendNotification</span> = <span class="number">12</span>
-<span class="key">groupId</span> = <span class="string">"production"</span>
 <span class="key">notificationChannels</span> = <span class="bracket">[</span><span class="bracket">]</span>
 
 <span class="comment"># Optional: Configure PulseMonitor for automated checks</span>
@@ -485,6 +484,7 @@
 <span class="key">strategy</span> = <span class="string">"percentage"</span>
 <span class="key">degradedThreshold</span> = <span class="number">50</span>
 <span class="key">interval</span> = <span class="number">30</span>
+<span class="key">children</span> = <span class="bracket">[</span><span class="string">"api-prod"</span><span class="bracket">]</span>
 
 <span class="comment"># Create a status page</span>
 <span class="bracket">[[</span><span class="key">status_pages</span><span class="bracket">]]</span>
