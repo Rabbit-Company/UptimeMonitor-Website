@@ -176,6 +176,21 @@ function pruneChildrenRefs(...ids) {
 	}
 }
 
+function pruneStatusPageItemRefs(...ids) {
+	const removeSet = new Set(ids.filter(Boolean));
+	if (removeSet.size === 0) return;
+
+	for (const sp of config.status_pages || []) {
+		if (Array.isArray(sp.items)) {
+			sp.items = sp.items.filter((v) => !removeSet.has(v));
+		}
+		if (Array.isArray(sp.leafItems)) {
+			sp.leafItems = sp.leafItems.filter((v) => !removeSet.has(v));
+			if (sp.leafItems.length === 0) delete sp.leafItems;
+		}
+	}
+}
+
 function replaceNotificationChannelRefs(oldId, newId) {
 	if (!oldId || !newId || oldId === newId) return;
 	const replace = (arr) => arr.map((v) => (v === oldId ? newId : v));
@@ -341,8 +356,10 @@ function removeMonitor(idx) {
 	config.monitors.splice(idx, 1);
 	pruneDependencyRefs(removedId);
 	pruneChildrenRefs(removedId);
+	pruneStatusPageItemRefs(removedId);
 	renderMonitors();
 	renderGroups();
+	renderStatusPages();
 	updateBadges();
 }
 
@@ -662,8 +679,10 @@ function removeGroup(idx) {
 	config.groups.splice(idx, 1);
 	pruneDependencyRefs(removedId);
 	pruneChildrenRefs(removedId);
+	pruneStatusPageItemRefs(removedId);
 	renderGroups();
 	renderMonitors();
+	renderStatusPages();
 	updateBadges();
 }
 
@@ -811,6 +830,11 @@ function renderStatusPages() {
 <div class="form-group full-width">
 	<label class="form-label">Items (Monitor/Group IDs) <span class="required">*</span></label>
 	${renderMultiSelect(`sp-items-${i}`, sp.items || [], "status_pages", i, "items")}
+</div>
+<div class="form-group full-width">
+	<label class="form-label">Leaf Items (Monitor/Group IDs)</label>
+	${renderMultiSelect(`sp-leafItems-${i}`, sp.leafItems || [], "status_pages", i, "leafItems")}
+	<span class="form-hint">Children of these items won't be expanded on the status page</span>
 </div>
 </div>
 </div>
@@ -1192,6 +1216,7 @@ function getAvailableOptions(optionType) {
 
 			return [...depGrpOpts, ...depMonOpts];
 		}
+		case "leafItems":
 		case "items": {
 			const monitorOpts = config.monitors
 				.filter((m) => m.id)
@@ -1264,6 +1289,11 @@ function addTag(section, idx, prop, value) {
 function removeTag(section, idx, prop, value) {
 	const item = config[section][idx];
 	if (item[prop]) item[prop] = item[prop].filter((v) => v !== value);
+	// Removing from status page items should also remove from leafItems
+	if (section === "status_pages" && prop === "items" && Array.isArray(item.leafItems)) {
+		item.leafItems = item.leafItems.filter((v) => v !== value);
+		if (item.leafItems.length === 0) delete item.leafItems;
+	}
 	reRenderSection(section);
 }
 
