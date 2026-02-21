@@ -827,6 +827,13 @@ function renderStatusPages() {
 	<label class="form-label">Password</label>
 	<input class="form-input" type="text" value="${esc(sp.password || "")}" data-bind="status_pages.${i}.password" data-empty-undefined placeholder="Optional (min 8 chars)" />
 </div>
+<div class="form-group">
+	<label class="form-check">
+		<input type="checkbox" ${sp.reports ? "checked" : ""} data-bind="status_pages.${i}.reports" data-type="boolean" />
+		<span class="form-check-label">Enable Reports</span>
+	</label>
+	<span class="form-hint">Allow exporting monitor and group history as CSV</span>
+</div>
 <div class="form-group full-width">
 	<label class="form-label">Items (Monitor/Group IDs) <span class="required">*</span></label>
 	${renderMultiSelect(`sp-items-${i}`, sp.items || [], "status_pages", i, "items")}
