@@ -65,7 +65,7 @@ function showToast(msg, error = false) {
 	t.textContent = msg;
 	t.className = "toast" + (error ? " error" : "");
 	requestAnimationFrame(() => t.classList.add("show"));
-	setTimeout(() => t.classList.remove("show"), 3000);
+	setTimeout(() => t.classList.remove("show"), 5000);
 }
 
 function flushActiveTabEdits() {
@@ -1383,6 +1383,171 @@ function resetConfig() {
 	showToast("Configuration reset");
 }
 
+function openServerSyncModal() {
+	const saved = loadSyncCredentials();
+	if (saved) {
+		document.getElementById("sync-server-url").value = saved.url || "";
+		document.getElementById("sync-api-token").value = saved.token || "";
+		document.getElementById("sync-remember").checked = true;
+	}
+	document.getElementById("serverSyncModal").classList.add("open");
+}
+
+function closeServerSyncModal() {
+	document.getElementById("serverSyncModal").classList.remove("open");
+}
+
+function toggleTokenVisibility() {
+	const input = document.getElementById("sync-api-token");
+	input.type = input.type === "password" ? "text" : "password";
+}
+
+function getSyncCredentials() {
+	const url = document.getElementById("sync-server-url").value.trim().replace(/\/+$/, "");
+	const token = document.getElementById("sync-api-token").value.trim();
+
+	if (!url || !token) {
+		showToast("Please enter both Server URL and Admin API Token", true);
+		return null;
+	}
+
+	try {
+		new URL(url);
+	} catch {
+		showToast("Invalid server URL", true);
+		return null;
+	}
+
+	if (document.getElementById("sync-remember").checked) {
+		saveSyncCredentials(url, token);
+	} else {
+		localStorage.removeItem("uptimemonitor-sync-credentials");
+	}
+
+	return { url, token };
+}
+
+function saveSyncCredentials(url, token) {
+	try {
+		localStorage.setItem("uptimemonitor-sync-credentials", JSON.stringify({ url, token }));
+	} catch {}
+}
+
+function loadSyncCredentials() {
+	try {
+		const raw = localStorage.getItem("uptimemonitor-sync-credentials");
+		return raw ? JSON.parse(raw) : null;
+	} catch {
+		return null;
+	}
+}
+
+function setSyncLoading(btnId, loading) {
+	const btn = document.getElementById(btnId);
+	if (loading) {
+		btn.classList.add("loading");
+	} else {
+		btn.classList.remove("loading");
+	}
+}
+
+async function pullFromServer() {
+	const creds = getSyncCredentials();
+	if (!creds) {
+		closeServerSyncModal();
+		return;
+	}
+
+	setSyncLoading("btn-pull", true);
+
+	try {
+		const res = await fetch(`${creds.url}/v1/admin/config?format=toml`, {
+			method: "GET",
+			headers: {
+				Authorization: `Bearer ${creds.token}`,
+			},
+		});
+
+		if (!res.ok) {
+			const errBody = await res.text();
+			let detail;
+			try {
+				detail = JSON.parse(errBody)?.error || errBody;
+			} catch {
+				detail = errBody;
+			}
+			throw new Error(`Server responded ${res.status}: ${detail}`);
+		}
+
+		const toml = await res.text();
+		parseTOML(toml);
+		closeServerSyncModal();
+		showToast("Configuration pulled from server!");
+	} catch (err) {
+		closeServerSyncModal();
+		showToast("Pull failed: " + err.message, true);
+	} finally {
+		setSyncLoading("btn-pull", false);
+	}
+}
+
+async function pushToServer() {
+	const creds = getSyncCredentials();
+	if (!creds) {
+		closeServerSyncModal();
+		return;
+	}
+
+	if (!confirm("This will overwrite the server configuration and trigger a reload. Continue?")) return;
+
+	flushActiveTabEdits();
+
+	const toExport = structuredClone(config);
+	pruneEmptyCustomMetrics(toExport);
+	pruneDisabledProviders(toExport);
+
+	const toml = TOML.stringify(toExport);
+
+	setSyncLoading("btn-push", true);
+
+	try {
+		const res = await fetch(`${creds.url}/v1/admin/config?format=toml`, {
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${creds.token}`,
+				"Content-Type": "application/toml; charset=utf-8",
+			},
+			body: toml,
+		});
+
+		if (!res.ok) {
+			const errBody = await res.json().catch(() => ({}));
+			const detail = errBody.details || errBody.error || `Status ${res.status}`;
+			throw new Error(typeof detail === "string" ? detail : JSON.stringify(detail));
+		}
+
+		closeServerSyncModal();
+		showToast("Configuration pushed to server!");
+	} catch (err) {
+		closeServerSyncModal();
+		showToast("Push failed: " + err.message, true);
+	} finally {
+		setSyncLoading("btn-push", false);
+	}
+}
+
+// Close modal on overlay click
+document.getElementById("serverSyncModal").addEventListener("click", (e) => {
+	if (e.target === e.currentTarget) closeServerSyncModal();
+});
+
+// Close modal on Escape
+document.addEventListener("keydown", (e) => {
+	if (e.key === "Escape" && document.getElementById("serverSyncModal").classList.contains("open")) {
+		closeServerSyncModal();
+	}
+});
+
 function loadExample() {
 	const example = `# Uptime Monitor - Example Configuration
 
@@ -1761,6 +1926,21 @@ document.body.addEventListener("click", (e) => {
 			break;
 		case "graph-reset":
 			renderGraph();
+			break;
+		case "open-server-sync":
+			openServerSyncModal();
+			break;
+		case "close-server-sync":
+			closeServerSyncModal();
+			break;
+		case "pull-from-server":
+			pullFromServer();
+			break;
+		case "push-to-server":
+			pushToServer();
+			break;
+		case "toggle-token-visibility":
+			toggleTokenVisibility();
 			break;
 	}
 });

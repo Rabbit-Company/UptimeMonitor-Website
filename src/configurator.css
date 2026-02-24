@@ -1009,3 +1009,118 @@ a:hover {
 		padding: 20px;
 	}
 }
+
+/*
+	Server Sync Modal
+*/
+
+.modal-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 10000;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.6);
+	backdrop-filter: blur(4px);
+	padding: 24px;
+	animation: fadeIn 0.2s ease;
+}
+.modal-overlay.open {
+	display: flex;
+}
+
+.modal {
+	background: var(--bg-surface);
+	border: 1px solid var(--border-default);
+	border-radius: 16px;
+	width: 100%;
+	max-width: 520px;
+	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+	animation: fadeInUp 0.25s ease;
+}
+.modal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 20px 24px;
+	border-bottom: 1px solid var(--border-subtle);
+}
+.modal-header h3 {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 1.1rem;
+}
+.modal-header h3 svg {
+	color: var(--accent-primary);
+}
+.modal-body {
+	padding: 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+.modal-desc {
+	color: var(--text-muted);
+	font-size: 0.9rem;
+	line-height: 1.5;
+}
+.modal-check {
+	margin-top: -4px;
+}
+.modal-footer {
+	display: flex;
+	gap: 12px;
+	padding: 16px 24px 20px;
+	border-top: 1px solid var(--border-subtle);
+}
+.modal-footer .btn {
+	flex: 1;
+	justify-content: center;
+}
+
+.input-with-toggle {
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+.input-with-toggle .form-input {
+	width: 100%;
+	padding-right: 44px;
+}
+.input-with-toggle .token-toggle {
+	position: absolute;
+	right: 4px;
+	width: 32px;
+	height: 32px;
+	border: none;
+	background: transparent;
+}
+
+.btn.loading {
+	pointer-events: none;
+	opacity: 0.7;
+}
+.btn.loading span {
+	visibility: hidden;
+}
+.btn.loading::after {
+	content: "";
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	border: 2px solid currentColor;
+	border-top-color: transparent;
+	border-radius: 50%;
+	animation: spin 0.6s linear infinite;
+}
+.modal-footer .btn {
+	position: relative;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
