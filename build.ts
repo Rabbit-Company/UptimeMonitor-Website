@@ -34,10 +34,29 @@ try {
 		process.exit(1);
 	}
 
+	const result3 = await Bun.build({
+		entrypoints: ["./src/incidents.js"],
+		outdir: "./dist",
+		target: "browser",
+		format: "esm",
+		minify: false,
+		sourcemap: "external",
+	});
+
+	if (!result3.success) {
+		console.error("❌ Build failed:", result3.logs);
+		process.exit(1);
+	}
+
 	await fs.cp("./src/index.html", "./dist/index.html");
 	await fs.cp("./src/index.css", "./dist/index.css");
+
 	await fs.cp("./src/configurator.html", "./dist/configurator.html");
 	await fs.cp("./src/configurator.css", "./dist/configurator.css");
+
+	await fs.cp("./src/incidents.html", "./dist/incidents.html");
+	await fs.cp("./src/incidents.css", "./dist/incidents.css");
+
 	await fs.cp("./src/_headers", "./dist/_headers");
 	await fs.cp("./src/logo.svg", "./dist/logo.svg");
 	await fs.cp("./src/sitemap.xml", "./dist/sitemap.xml");
