@@ -59,6 +59,7 @@ try {
 
 	await fs.cp("./src/_headers", "./dist/_headers");
 	await fs.cp("./src/logo.svg", "./dist/logo.svg");
+	await fs.cp("./src/shared.css", "./dist/shared.css");
 	await fs.cp("./src/sitemap.xml", "./dist/sitemap.xml");
 	await fs.cp("./src/robots.txt", "./dist/robots.txt");
 
