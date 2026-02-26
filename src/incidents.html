@@ -15,7 +15,7 @@
 	</head>
 	<body>
 		<!-- Header -->
-		<header class="header" id="header">
+		<header class="header" id="header" role="banner">
 			<div class="container">
 				<div class="header-inner">
 					<a href="/" class="logo">
@@ -23,7 +23,7 @@
 						<span>Uptime Monitor</span>
 					</a>
 
-					<nav class="nav">
+					<nav class="nav" role="navigation" aria-label="Main navigation">
 						<ul class="nav-links">
 							<li><a href="/#features">Features</a></li>
 							<li><a href="/#protocols">Protocols</a></li>
@@ -57,7 +57,7 @@
 				</div>
 
 				<!-- Mobile Menu -->
-				<div class="mobile-menu" id="mobileMenu">
+				<div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="Mobile navigation">
 					<ul class="mobile-nav-links">
 						<li><a href="/#features">Features</a></li>
 						<li><a href="/#protocols">Protocols</a></li>
@@ -84,123 +84,125 @@
 			</div>
 		</header>
 
-		<!-- Page Hero -->
-		<section class="page-hero">
-			<div class="container">
-				<div class="page-hero-content">
-					<h1><span class="gradient">Incident</span> Manager</h1>
-					<p>Create, manage, and resolve incident reports for your status pages directly from the browser.</p>
-				</div>
-			</div>
-		</section>
-
-		<!-- Main Content -->
-		<section class="config-main">
-			<div class="container">
-				<!-- Connection Panel -->
-				<div class="config-card" id="connection-card">
-					<div class="config-card-header">
-						<div class="config-card-title">
-							<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
-								<rect x="2" y="2" width="20" height="8" rx="2" />
-								<rect x="2" y="14" width="20" height="8" rx="2" />
-								<path d="M6 6h.01M6 18h.01" />
-							</svg>
-							<h3>Server Connection</h3>
-							<span class="badge" id="connection-status">Disconnected</span>
-						</div>
+		<main role="main">
+			<!-- Page Hero -->
+			<section class="page-hero">
+				<div class="container">
+					<div class="page-hero-content">
+						<h1><span class="gradient">Incident</span> Manager</h1>
+						<p>Create, manage, and resolve incident reports for your status pages directly from the browser.</p>
 					</div>
-					<div class="form-grid">
-						<div class="form-group">
-							<label class="form-label">Server URL <span class="required">*</span></label>
-							<input type="url" class="form-input" id="server-url" placeholder="https://uptime.example.com" />
-							<span class="form-hint">Base URL of your Uptime Monitor server (no trailing slash)</span>
-						</div>
-						<div class="form-group">
-							<label class="form-label">Admin API Token <span class="required">*</span></label>
-							<div class="input-with-toggle">
-								<input type="password" class="form-input" id="admin-token" placeholder="your-admin-api-token" />
-								<button class="btn-icon token-toggle" id="toggle-token" aria-label="Toggle visibility">
-									<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-										<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-										<circle cx="12" cy="12" r="3" />
-									</svg>
-								</button>
+				</div>
+			</section>
+
+			<!-- Main Content -->
+			<section class="config-main">
+				<div class="container">
+					<!-- Connection Panel -->
+					<div class="config-card" id="connection-card">
+						<div class="config-card-header">
+							<div class="config-card-title">
+								<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+									<rect x="2" y="2" width="20" height="8" rx="2" />
+									<rect x="2" y="14" width="20" height="8" rx="2" />
+									<path d="M6 6h.01M6 18h.01" />
+								</svg>
+								<h3>Server Connection</h3>
+								<span class="badge" id="connection-status">Disconnected</span>
 							</div>
-							<span class="form-hint">The token configured in <code>adminAPI.token</code></span>
 						</div>
-						<div class="form-group">
-							<label class="form-label">Status Page ID <span class="required">*</span></label>
-							<input type="text" class="form-input" id="status-page-id" placeholder="e.g. main, public" />
-							<span class="form-hint">ID of the status page to manage incidents for</span>
+						<div class="form-grid">
+							<div class="form-group">
+								<label class="form-label">Server URL <span class="required">*</span></label>
+								<input type="url" class="form-input" id="server-url" placeholder="https://uptime.example.com" />
+								<span class="form-hint">Base URL of your Uptime Monitor server (no trailing slash)</span>
+							</div>
+							<div class="form-group">
+								<label class="form-label">Admin API Token <span class="required">*</span></label>
+								<div class="input-with-toggle">
+									<input type="password" class="form-input" id="admin-token" placeholder="your-admin-api-token" />
+									<button class="btn-icon token-toggle" id="toggle-token" aria-label="Toggle visibility">
+										<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+											<circle cx="12" cy="12" r="3" />
+										</svg>
+									</button>
+								</div>
+								<span class="form-hint">The token configured in <code>adminAPI.token</code></span>
+							</div>
+							<div class="form-group">
+								<label class="form-label">Status Page ID <span class="required">*</span></label>
+								<input type="text" class="form-input" id="status-page-id" placeholder="e.g. main, public" />
+								<span class="form-hint">ID of the status page to manage incidents for</span>
+							</div>
 						</div>
-					</div>
-					<div class="connection-actions">
-						<button class="btn btn-primary" id="btn-connect">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3" />
-								<line x1="8" y1="12" x2="16" y2="12" />
-							</svg>
-							<span>Connect</span>
-						</button>
-						<label class="form-check">
-							<input type="checkbox" id="remember-credentials" checked />
-							<span class="form-check-label">Remember credentials</span>
-						</label>
-					</div>
-				</div>
-
-				<!-- Incidents Panel (shown after connection) -->
-				<div id="incidents-panel" style="display: none">
-					<!-- Toolbar -->
-					<div class="toolbar">
-						<div class="toolbar-group">
-							<button class="btn btn-primary" id="btn-new-incident">
+						<div class="connection-actions">
+							<button class="btn btn-primary" id="btn-connect">
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<circle cx="12" cy="12" r="10" />
-									<line x1="12" y1="8" x2="12" y2="16" />
+									<path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3" />
 									<line x1="8" y1="12" x2="16" y2="12" />
 								</svg>
-								New Incident
+								<span>Connect</span>
 							</button>
-							<button class="btn btn-secondary" id="btn-refresh">
-								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<polyline points="23 4 23 10 17 10" />
-									<polyline points="1 20 1 14 7 14" />
-									<path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
-								</svg>
-								Refresh
-							</button>
-						</div>
-						<div class="toolbar-group">
-							<div class="filter-group">
-								<select class="form-select filter-select" id="filter-status">
-									<option value="">All Statuses</option>
-									<option value="investigating">Investigating</option>
-									<option value="identified">Identified</option>
-									<option value="monitoring">Monitoring</option>
-									<option value="resolved">Resolved</option>
-								</select>
-							</div>
-							<div class="filter-group">
-								<select class="form-select filter-select" id="filter-severity">
-									<option value="">All Severities</option>
-									<option value="minor">Minor</option>
-									<option value="major">Major</option>
-									<option value="critical">Critical</option>
-								</select>
-							</div>
+							<label class="form-check">
+								<input type="checkbox" id="remember-credentials" checked />
+								<span class="form-check-label">Remember credentials</span>
+							</label>
 						</div>
 					</div>
 
-					<!-- Incidents List -->
-					<div id="incidents-list"></div>
+					<!-- Incidents Panel (shown after connection) -->
+					<div id="incidents-panel" style="display: none">
+						<!-- Toolbar -->
+						<div class="toolbar">
+							<div class="toolbar-group">
+								<button class="btn btn-primary" id="btn-new-incident">
+									<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<circle cx="12" cy="12" r="10" />
+										<line x1="12" y1="8" x2="12" y2="16" />
+										<line x1="8" y1="12" x2="16" y2="12" />
+									</svg>
+									New Incident
+								</button>
+								<button class="btn btn-secondary" id="btn-refresh">
+									<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<polyline points="23 4 23 10 17 10" />
+										<polyline points="1 20 1 14 7 14" />
+										<path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+									</svg>
+									Refresh
+								</button>
+							</div>
+							<div class="toolbar-group">
+								<div class="filter-group">
+									<select class="form-select filter-select" id="filter-status">
+										<option value="">All Statuses</option>
+										<option value="investigating">Investigating</option>
+										<option value="identified">Identified</option>
+										<option value="monitoring">Monitoring</option>
+										<option value="resolved">Resolved</option>
+									</select>
+								</div>
+								<div class="filter-group">
+									<select class="form-select filter-select" id="filter-severity">
+										<option value="">All Severities</option>
+										<option value="minor">Minor</option>
+										<option value="major">Major</option>
+										<option value="critical">Critical</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<!-- Incidents List -->
+						<div id="incidents-list"></div>
+					</div>
 				</div>
-			</div>
-		</section>
+			</section>
+		</main>
 
 		<!-- Footer -->
-		<footer class="footer">
+		<footer class="footer" role="contentinfo">
 			<div class="container">
 				<div class="footer-grid">
 					<div class="footer-brand">

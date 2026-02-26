@@ -12,7 +12,7 @@
 	</head>
 	<body>
 		<!-- Header -->
-		<header class="header" id="header">
+		<header class="header" id="header" role="banner">
 			<div class="container">
 				<div class="header-inner">
 					<a href="/" class="logo">
@@ -20,7 +20,7 @@
 						<span>Uptime Monitor</span>
 					</a>
 
-					<nav class="nav">
+					<nav class="nav" role="navigation" aria-label="Main navigation">
 						<ul class="nav-links">
 							<li><a href="/#features">Features</a></li>
 							<li><a href="/#protocols">Protocols</a></li>
@@ -54,7 +54,7 @@
 				</div>
 
 				<!-- Mobile Menu -->
-				<div class="mobile-menu" id="mobileMenu">
+				<div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="Mobile navigation">
 					<ul class="mobile-nav-links">
 						<li><a href="/#features">Features</a></li>
 						<li><a href="/#protocols">Protocols</a></li>
@@ -81,350 +81,352 @@
 			</div>
 		</header>
 
-		<!-- Page Hero -->
-		<section class="page-hero">
-			<div class="container">
-				<div class="page-hero-content">
-					<h1>Visual <span class="gradient">Configuration</span> Editor</h1>
-					<p>Import your config.toml, edit visually, and export back. No more manual TOML wrangling.</p>
-				</div>
-			</div>
-		</section>
-
-		<!-- Main Content -->
-		<section class="config-main">
-			<div class="container">
-				<!-- Toolbar -->
-				<div class="toolbar">
-					<div class="toolbar-group">
-						<button class="btn btn-secondary btn-sm" data-action="import-toml">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-								<polyline points="17 8 12 3 7 8" />
-								<line x1="12" y1="3" x2="12" y2="15" />
-							</svg>
-							Import TOML
-						</button>
-						<input type="file" id="fileInput" accept=".toml,.txt" />
-						<button class="btn btn-secondary btn-sm" data-action="load-example">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-								<polyline points="14 2 14 8 20 8" />
-							</svg>
-							Load Example
-						</button>
-						<button class="btn btn-secondary btn-sm" data-action="reset-config">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<polyline points="1 4 1 10 7 10" />
-								<path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
-							</svg>
-							Reset
-						</button>
-					</div>
-					<div class="toolbar-group">
-						<button class="btn btn-secondary btn-sm" data-action="open-server-sync">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<rect x="2" y="2" width="20" height="8" rx="2" />
-								<rect x="2" y="14" width="20" height="8" rx="2" />
-								<path d="M6 6h.01M6 18h.01" />
-							</svg>
-							Server Sync
-						</button>
-						<button class="btn btn-primary btn-sm" data-action="export-toml">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-								<polyline points="7 10 12 15 17 10" />
-								<line x1="12" y1="15" x2="12" y2="3" />
-							</svg>
-							Export TOML
-						</button>
+		<main role="main">
+			<!-- Page Hero -->
+			<section class="page-hero">
+				<div class="container">
+					<div class="page-hero-content">
+						<h1>Visual <span class="gradient">Configuration</span> Editor</h1>
+						<p>Import your config.toml, edit visually, and export back. No more manual TOML wrangling.</p>
 					</div>
 				</div>
+			</section>
 
-				<!-- Tabs -->
-				<div class="tabs" id="tabs">
-					<button class="tab active" data-tab="general">General</button>
-					<button class="tab" data-tab="monitors">Monitors <span class="tab-badge" id="badge-monitors">0</span></button>
-					<button class="tab" data-tab="groups">Groups <span class="tab-badge" id="badge-groups">0</span></button>
-					<button class="tab" data-tab="statuspages">Status Pages <span class="tab-badge" id="badge-statuspages">0</span></button>
-					<button class="tab" data-tab="notifications">Notifications <span class="tab-badge" id="badge-notifications">0</span></button>
-					<button class="tab" data-tab="pulsemonitors">PulseMonitors <span class="tab-badge" id="badge-pulsemonitors">0</span></button>
+			<!-- Main Content -->
+			<section class="config-main">
+				<div class="container">
+					<!-- Toolbar -->
+					<div class="toolbar">
+						<div class="toolbar-group">
+							<button class="btn btn-secondary btn-sm" data-action="import-toml">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+									<polyline points="17 8 12 3 7 8" />
+									<line x1="12" y1="3" x2="12" y2="15" />
+								</svg>
+								Import TOML
+							</button>
+							<input type="file" id="fileInput" accept=".toml,.txt" />
+							<button class="btn btn-secondary btn-sm" data-action="load-example">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+									<polyline points="14 2 14 8 20 8" />
+								</svg>
+								Load Example
+							</button>
+							<button class="btn btn-secondary btn-sm" data-action="reset-config">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<polyline points="1 4 1 10 7 10" />
+									<path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+								</svg>
+								Reset
+							</button>
+						</div>
+						<div class="toolbar-group">
+							<button class="btn btn-secondary btn-sm" data-action="open-server-sync">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<rect x="2" y="2" width="20" height="8" rx="2" />
+									<rect x="2" y="14" width="20" height="8" rx="2" />
+									<path d="M6 6h.01M6 18h.01" />
+								</svg>
+								Server Sync
+							</button>
+							<button class="btn btn-primary btn-sm" data-action="export-toml">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+									<polyline points="7 10 12 15 17 10" />
+									<line x1="12" y1="15" x2="12" y2="3" />
+								</svg>
+								Export TOML
+							</button>
+						</div>
+					</div>
+
+					<!-- Tabs -->
+					<div class="tabs" id="tabs">
+						<button class="tab active" data-tab="general">General</button>
+						<button class="tab" data-tab="monitors">Monitors <span class="tab-badge" id="badge-monitors">0</span></button>
+						<button class="tab" data-tab="groups">Groups <span class="tab-badge" id="badge-groups">0</span></button>
+						<button class="tab" data-tab="statuspages">Status Pages <span class="tab-badge" id="badge-statuspages">0</span></button>
+						<button class="tab" data-tab="notifications">Notifications <span class="tab-badge" id="badge-notifications">0</span></button>
+						<button class="tab" data-tab="pulsemonitors">PulseMonitors <span class="tab-badge" id="badge-pulsemonitors">0</span></button>
+					</div>
+
+					<!-- General Tab -->
+					<div class="tab-panel active" id="panel-general">
+						<!-- ClickHouse -->
+						<div class="config-card">
+							<div class="config-card-header">
+								<div class="config-card-title">
+									<h3>ClickHouse Connection</h3>
+									<span class="badge">Required</span>
+								</div>
+							</div>
+							<div class="form-grid">
+								<div class="form-group full-width">
+									<label class="form-label">Connection URL <span class="required">*</span></label>
+									<input class="form-input mono" type="text" id="ch-url" placeholder="http://user:pass@clickhouse:8123/uptime_monitor" />
+									<span class="form-hint">Format: http://user:password@host:port/database</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Server -->
+						<div class="config-card">
+							<div class="config-card-header">
+								<div class="config-card-title"><h3>Server Settings</h3></div>
+							</div>
+							<div class="form-grid">
+								<div class="form-group">
+									<label class="form-label">Port</label>
+									<input class="form-input" type="number" id="srv-port" placeholder="3000" />
+								</div>
+								<div class="form-group">
+									<label class="form-label">Proxy Preset</label>
+									<select class="form-select" id="srv-proxy">
+										<option value="">Default (direct)</option>
+										<option value="direct">direct</option>
+										<option value="cloudflare">cloudflare</option>
+										<option value="aws">aws</option>
+										<option value="gcp">gcp</option>
+										<option value="azure">azure</option>
+										<option value="vercel">vercel</option>
+										<option value="nginx">nginx</option>
+										<option value="development">development</option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label class="form-label">Reload Token</label>
+									<input class="form-input mono" type="text" id="srv-reloadToken" placeholder="Auto-generated if empty" />
+								</div>
+							</div>
+						</div>
+
+						<!-- Logger -->
+						<div class="config-card">
+							<div class="config-card-header">
+								<div class="config-card-title"><h3>Logger</h3></div>
+							</div>
+							<div class="form-grid">
+								<div class="form-group">
+									<label class="form-label">Log Level</label>
+									<select class="form-select" id="log-level">
+										<option value="">Default (4 - HTTP)</option>
+										<option value="0">0 - ERROR</option>
+										<option value="1">1 - WARN</option>
+										<option value="2">2 - AUDIT</option>
+										<option value="3">3 - INFO</option>
+										<option value="4">4 - HTTP</option>
+										<option value="5">5 - DEBUG</option>
+										<option value="6">6 - VERBOSE</option>
+										<option value="7">7 - SILLY</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<!-- Missing Pulse Detector -->
+						<div class="config-card">
+							<div class="config-card-header">
+								<div class="config-card-title"><h3>Missing Pulse Detector</h3></div>
+							</div>
+							<div class="form-grid">
+								<div class="form-group">
+									<label class="form-label">Check Interval (seconds)</label>
+									<input class="form-input" type="number" id="mpd-interval" placeholder="5" min="1" />
+								</div>
+							</div>
+						</div>
+
+						<!-- Self-Monitoring -->
+						<div class="config-card">
+							<div class="config-card-header">
+								<div class="config-card-title"><h3>Self-Monitoring</h3></div>
+							</div>
+							<div class="form-grid">
+								<div class="form-group">
+									<label class="form-check">
+										<input type="checkbox" id="sm-enabled" />
+										<span class="form-check-label">Enable self-monitoring</span>
+									</label>
+								</div>
+								<div class="form-group">
+									<label class="form-label">ID</label>
+									<input class="form-input mono" type="text" id="sm-id" placeholder="self-monitor" />
+								</div>
+								<div class="form-group">
+									<label class="form-label">Interval (seconds)</label>
+									<input class="form-input" type="number" id="sm-interval" placeholder="3" min="1" />
+								</div>
+								<div class="form-group">
+									<label class="form-check">
+										<input type="checkbox" id="sm-backfill" />
+										<span class="form-check-label">Backfill on recovery</span>
+									</label>
+								</div>
+								<div class="form-group">
+									<label class="form-label">Latency Strategy</label>
+									<select class="form-select" id="sm-latencyStrategy">
+										<option value="last-known">last-known</option>
+										<option value="null">null</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<!-- Admin API -->
+						<div class="config-card">
+							<div class="config-card-header">
+								<div class="config-card-title"><h3>Admin API</h3></div>
+							</div>
+							<div class="form-grid">
+								<div class="form-group">
+									<label class="form-check">
+										<input type="checkbox" id="admin-enabled" />
+										<span class="form-check-label">Enable Admin API</span>
+									</label>
+								</div>
+								<div class="form-group">
+									<label class="form-label">Token</label>
+									<input class="form-input mono" type="text" id="admin-token" placeholder="Auto-generated if empty" />
+									<span class="form-hint">Authentication token for Admin API access</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Monitors Tab -->
+					<div class="tab-panel" id="panel-monitors">
+						<div id="monitors-list"></div>
+						<div style="text-align: center; margin-top: 16px">
+							<button class="btn btn-secondary" data-action="add-monitor">
+								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<line x1="12" y1="5" x2="12" y2="19" />
+									<line x1="5" y1="12" x2="19" y2="12" />
+								</svg>
+								Add Monitor
+							</button>
+						</div>
+					</div>
+
+					<!-- Groups Tab -->
+					<div class="tab-panel" id="panel-groups">
+						<div id="groups-list"></div>
+						<div style="text-align: center; margin-top: 16px">
+							<button class="btn btn-secondary" data-action="add-group">
+								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<line x1="12" y1="5" x2="12" y2="19" />
+									<line x1="5" y1="12" x2="19" y2="12" />
+								</svg>
+								Add Group
+							</button>
+						</div>
+					</div>
+
+					<!-- Status Pages Tab -->
+					<div class="tab-panel" id="panel-statuspages">
+						<div id="statuspages-list"></div>
+						<div style="text-align: center; margin-top: 16px">
+							<button class="btn btn-secondary" data-action="add-statuspage">
+								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<line x1="12" y1="5" x2="12" y2="19" />
+									<line x1="5" y1="12" x2="19" y2="12" />
+								</svg>
+								Add Status Page
+							</button>
+						</div>
+					</div>
+
+					<!-- Notifications Tab -->
+					<div class="tab-panel" id="panel-notifications">
+						<div id="notifications-list"></div>
+						<div style="text-align: center; margin-top: 16px">
+							<button class="btn btn-secondary" data-action="add-notification">
+								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<line x1="12" y1="5" x2="12" y2="19" />
+									<line x1="5" y1="12" x2="19" y2="12" />
+								</svg>
+								Add Notification Channel
+							</button>
+						</div>
+					</div>
+
+					<!-- PulseMonitors Tab -->
+					<div class="tab-panel" id="panel-pulsemonitors">
+						<div id="pulsemonitors-list"></div>
+						<div style="text-align: center; margin-top: 16px">
+							<button class="btn btn-secondary" data-action="add-pulsemonitor">
+								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<line x1="12" y1="5" x2="12" y2="19" />
+									<line x1="5" y1="12" x2="19" y2="12" />
+								</svg>
+								Add PulseMonitor
+							</button>
+						</div>
+					</div>
 				</div>
+			</section>
 
-				<!-- General Tab -->
-				<div class="tab-panel active" id="panel-general">
-					<!-- ClickHouse -->
-					<div class="config-card">
-						<div class="config-card-header">
-							<div class="config-card-title">
-								<h3>ClickHouse Connection</h3>
-								<span class="badge">Required</span>
-							</div>
+			<!-- Relationship Visualizer -->
+			<section class="section visualizer-section" id="visualizer-section">
+				<div class="container">
+					<div class="visualizer-header">
+						<div class="visualizer-title-group">
+							<h2>Configuration <span class="gradient">Topology</span></h2>
+							<p>Interactive graph showing how monitors, groups, status pages, notifications, and PulseMonitor agents are connected.</p>
 						</div>
-						<div class="form-grid">
-							<div class="form-group full-width">
-								<label class="form-label">Connection URL <span class="required">*</span></label>
-								<input class="form-input mono" type="text" id="ch-url" placeholder="http://user:pass@clickhouse:8123/uptime_monitor" />
-								<span class="form-hint">Format: http://user:password@host:port/database</span>
-							</div>
+						<div class="visualizer-controls">
+							<select
+								id="graph-filter"
+								class="form-select"
+								style="padding: 6px 32px 6px 12px; font-size: 0.85rem; width: auto; background-position: right 8px center"
+							>
+								<option value="all">Show All Connections</option>
+							</select>
+
+							<button class="btn btn-secondary btn-sm" data-action="graph-refresh" title="Refresh graph">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<polyline points="1 4 1 10 7 10" />
+									<path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+								</svg>
+								Refresh
+							</button>
+
+							<button class="btn btn-secondary btn-sm" data-action="graph-fit" title="Fit to view">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+								</svg>
+								Fit
+							</button>
 						</div>
 					</div>
-
-					<!-- Server -->
-					<div class="config-card">
-						<div class="config-card-header">
-							<div class="config-card-title"><h3>Server Settings</h3></div>
+					<div class="visualizer-container">
+						<div id="cy-graph"></div>
+						<div class="visualizer-legend">
+							<div class="legend-item"><span class="legend-dot legend-dot-monitor"></span> Monitor</div>
+							<div class="legend-item"><span class="legend-dot legend-dot-group"></span> Group</div>
+							<div class="legend-item"><span class="legend-dot legend-dot-statuspage"></span> Status Page</div>
+							<div class="legend-item"><span class="legend-dot legend-dot-notification"></span> Notification</div>
+							<div class="legend-item"><span class="legend-dot legend-dot-pulse"></span> PulseMonitor</div>
+							<div class="legend-item"><span class="legend-dot legend-dot-dependency"></span> Dependency</div>
 						</div>
-						<div class="form-grid">
-							<div class="form-group">
-								<label class="form-label">Port</label>
-								<input class="form-input" type="number" id="srv-port" placeholder="3000" />
-							</div>
-							<div class="form-group">
-								<label class="form-label">Proxy Preset</label>
-								<select class="form-select" id="srv-proxy">
-									<option value="">Default (direct)</option>
-									<option value="direct">direct</option>
-									<option value="cloudflare">cloudflare</option>
-									<option value="aws">aws</option>
-									<option value="gcp">gcp</option>
-									<option value="azure">azure</option>
-									<option value="vercel">vercel</option>
-									<option value="nginx">nginx</option>
-									<option value="development">development</option>
-								</select>
-							</div>
-							<div class="form-group">
-								<label class="form-label">Reload Token</label>
-								<input class="form-input mono" type="text" id="srv-reloadToken" placeholder="Auto-generated if empty" />
-							</div>
-						</div>
-					</div>
-
-					<!-- Logger -->
-					<div class="config-card">
-						<div class="config-card-header">
-							<div class="config-card-title"><h3>Logger</h3></div>
-						</div>
-						<div class="form-grid">
-							<div class="form-group">
-								<label class="form-label">Log Level</label>
-								<select class="form-select" id="log-level">
-									<option value="">Default (4 - HTTP)</option>
-									<option value="0">0 - ERROR</option>
-									<option value="1">1 - WARN</option>
-									<option value="2">2 - AUDIT</option>
-									<option value="3">3 - INFO</option>
-									<option value="4">4 - HTTP</option>
-									<option value="5">5 - DEBUG</option>
-									<option value="6">6 - VERBOSE</option>
-									<option value="7">7 - SILLY</option>
-								</select>
-							</div>
-						</div>
-					</div>
-
-					<!-- Missing Pulse Detector -->
-					<div class="config-card">
-						<div class="config-card-header">
-							<div class="config-card-title"><h3>Missing Pulse Detector</h3></div>
-						</div>
-						<div class="form-grid">
-							<div class="form-group">
-								<label class="form-label">Check Interval (seconds)</label>
-								<input class="form-input" type="number" id="mpd-interval" placeholder="5" min="1" />
-							</div>
-						</div>
-					</div>
-
-					<!-- Self-Monitoring -->
-					<div class="config-card">
-						<div class="config-card-header">
-							<div class="config-card-title"><h3>Self-Monitoring</h3></div>
-						</div>
-						<div class="form-grid">
-							<div class="form-group">
-								<label class="form-check">
-									<input type="checkbox" id="sm-enabled" />
-									<span class="form-check-label">Enable self-monitoring</span>
-								</label>
-							</div>
-							<div class="form-group">
-								<label class="form-label">ID</label>
-								<input class="form-input mono" type="text" id="sm-id" placeholder="self-monitor" />
-							</div>
-							<div class="form-group">
-								<label class="form-label">Interval (seconds)</label>
-								<input class="form-input" type="number" id="sm-interval" placeholder="3" min="1" />
-							</div>
-							<div class="form-group">
-								<label class="form-check">
-									<input type="checkbox" id="sm-backfill" />
-									<span class="form-check-label">Backfill on recovery</span>
-								</label>
-							</div>
-							<div class="form-group">
-								<label class="form-label">Latency Strategy</label>
-								<select class="form-select" id="sm-latencyStrategy">
-									<option value="last-known">last-known</option>
-									<option value="null">null</option>
-								</select>
-							</div>
-						</div>
-					</div>
-
-					<!-- Admin API -->
-					<div class="config-card">
-						<div class="config-card-header">
-							<div class="config-card-title"><h3>Admin API</h3></div>
-						</div>
-						<div class="form-grid">
-							<div class="form-group">
-								<label class="form-check">
-									<input type="checkbox" id="admin-enabled" />
-									<span class="form-check-label">Enable Admin API</span>
-								</label>
-							</div>
-							<div class="form-group">
-								<label class="form-label">Token</label>
-								<input class="form-input mono" type="text" id="admin-token" placeholder="Auto-generated if empty" />
-								<span class="form-hint">Authentication token for Admin API access</span>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<!-- Monitors Tab -->
-				<div class="tab-panel" id="panel-monitors">
-					<div id="monitors-list"></div>
-					<div style="text-align: center; margin-top: 16px">
-						<button class="btn btn-secondary" data-action="add-monitor">
-							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<line x1="12" y1="5" x2="12" y2="19" />
-								<line x1="5" y1="12" x2="19" y2="12" />
+						<div class="visualizer-empty" id="graph-empty">
+							<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+								<circle cx="5.5" cy="7" r="2.5" />
+								<circle cx="18.5" cy="7" r="2.5" />
+								<circle cx="12" cy="18" r="2.5" />
+								<path d="M7.5 8.5L10.5 16M16.5 8.5L13.5 16M8 7h8" />
 							</svg>
-							Add Monitor
-						</button>
+							<h3>No Connections Yet</h3>
+							<p>Import a config or add monitors and groups above to see the topology graph.</p>
+						</div>
 					</div>
 				</div>
-
-				<!-- Groups Tab -->
-				<div class="tab-panel" id="panel-groups">
-					<div id="groups-list"></div>
-					<div style="text-align: center; margin-top: 16px">
-						<button class="btn btn-secondary" data-action="add-group">
-							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<line x1="12" y1="5" x2="12" y2="19" />
-								<line x1="5" y1="12" x2="19" y2="12" />
-							</svg>
-							Add Group
-						</button>
-					</div>
-				</div>
-
-				<!-- Status Pages Tab -->
-				<div class="tab-panel" id="panel-statuspages">
-					<div id="statuspages-list"></div>
-					<div style="text-align: center; margin-top: 16px">
-						<button class="btn btn-secondary" data-action="add-statuspage">
-							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<line x1="12" y1="5" x2="12" y2="19" />
-								<line x1="5" y1="12" x2="19" y2="12" />
-							</svg>
-							Add Status Page
-						</button>
-					</div>
-				</div>
-
-				<!-- Notifications Tab -->
-				<div class="tab-panel" id="panel-notifications">
-					<div id="notifications-list"></div>
-					<div style="text-align: center; margin-top: 16px">
-						<button class="btn btn-secondary" data-action="add-notification">
-							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<line x1="12" y1="5" x2="12" y2="19" />
-								<line x1="5" y1="12" x2="19" y2="12" />
-							</svg>
-							Add Notification Channel
-						</button>
-					</div>
-				</div>
-
-				<!-- PulseMonitors Tab -->
-				<div class="tab-panel" id="panel-pulsemonitors">
-					<div id="pulsemonitors-list"></div>
-					<div style="text-align: center; margin-top: 16px">
-						<button class="btn btn-secondary" data-action="add-pulsemonitor">
-							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<line x1="12" y1="5" x2="12" y2="19" />
-								<line x1="5" y1="12" x2="19" y2="12" />
-							</svg>
-							Add PulseMonitor
-						</button>
-					</div>
-				</div>
-			</div>
-		</section>
-
-		<!-- Relationship Visualizer -->
-		<section class="section visualizer-section" id="visualizer-section">
-			<div class="container">
-				<div class="visualizer-header">
-					<div class="visualizer-title-group">
-						<h2>Configuration <span class="gradient">Topology</span></h2>
-						<p>Interactive graph showing how monitors, groups, status pages, notifications, and PulseMonitor agents are connected.</p>
-					</div>
-					<div class="visualizer-controls">
-						<select
-							id="graph-filter"
-							class="form-select"
-							style="padding: 6px 32px 6px 12px; font-size: 0.85rem; width: auto; background-position: right 8px center"
-						>
-							<option value="all">Show All Connections</option>
-						</select>
-
-						<button class="btn btn-secondary btn-sm" data-action="graph-refresh" title="Refresh graph">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<polyline points="1 4 1 10 7 10" />
-								<path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
-							</svg>
-							Refresh
-						</button>
-
-						<button class="btn btn-secondary btn-sm" data-action="graph-fit" title="Fit to view">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-							</svg>
-							Fit
-						</button>
-					</div>
-				</div>
-				<div class="visualizer-container">
-					<div id="cy-graph"></div>
-					<div class="visualizer-legend">
-						<div class="legend-item"><span class="legend-dot legend-dot-monitor"></span> Monitor</div>
-						<div class="legend-item"><span class="legend-dot legend-dot-group"></span> Group</div>
-						<div class="legend-item"><span class="legend-dot legend-dot-statuspage"></span> Status Page</div>
-						<div class="legend-item"><span class="legend-dot legend-dot-notification"></span> Notification</div>
-						<div class="legend-item"><span class="legend-dot legend-dot-pulse"></span> PulseMonitor</div>
-						<div class="legend-item"><span class="legend-dot legend-dot-dependency"></span> Dependency</div>
-					</div>
-					<div class="visualizer-empty" id="graph-empty">
-						<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-							<circle cx="5.5" cy="7" r="2.5" />
-							<circle cx="18.5" cy="7" r="2.5" />
-							<circle cx="12" cy="18" r="2.5" />
-							<path d="M7.5 8.5L10.5 16M16.5 8.5L13.5 16M8 7h8" />
-						</svg>
-						<h3>No Connections Yet</h3>
-						<p>Import a config or add monitors and groups above to see the topology graph.</p>
-					</div>
-				</div>
-			</div>
-		</section>
+			</section>
+		</main>
 
 		<!-- Footer -->
-		<footer class="footer">
+		<footer class="footer" role="contentinfo">
 			<div class="container">
 				<div class="footer-grid">
 					<div class="footer-brand">
