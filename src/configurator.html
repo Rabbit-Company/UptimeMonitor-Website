@@ -202,16 +202,15 @@
 							</div>
 						</div>
 
-						<!-- Logger -->
+						<!-- Logging -->
 						<div class="config-card">
 							<div class="config-card-header">
-								<div class="config-card-title"><h3>Logger</h3></div>
+								<div class="config-card-title"><h3>Logging</h3></div>
 							</div>
 							<div class="form-grid">
 								<div class="form-group">
-									<label class="form-label">Log Level</label>
+									<label class="form-label">Level</label>
 									<select class="form-select" id="log-level">
-										<option value="">Default (4 - HTTP)</option>
 										<option value="0">0 - ERROR</option>
 										<option value="1">1 - WARN</option>
 										<option value="2">2 - AUDIT</option>
@@ -221,6 +220,70 @@
 										<option value="6">6 - VERBOSE</option>
 										<option value="7">7 - SILLY</option>
 									</select>
+								</div>
+								<div class="form-group">
+									<label class="form-check">
+										<input type="checkbox" id="loki-enabled" />
+										<span class="form-check-label">Enable Loki Transport</span>
+									</label>
+									<span class="form-hint">Ship logs to a Grafana Loki instance</span>
+								</div>
+							</div>
+							<!-- Loki Settings (shown when enabled) -->
+							<div id="loki-settings" class="sub-card" style="display: none">
+								<div class="sub-card-header">
+									<span class="sub-card-title">Loki Configuration</span>
+								</div>
+								<div class="form-grid">
+									<div class="form-group">
+										<label class="form-label">URL <span class="required">*</span></label>
+										<input class="form-input mono" type="text" id="loki-url" placeholder="http://loki:3100" value="http://loki:3100" />
+										<span class="form-hint">Loki push API base URL</span>
+									</div>
+									<div class="form-group">
+										<label class="form-label">Tenant ID</label>
+										<input class="form-input mono" type="text" id="loki-tenantId" placeholder="Required for multi-tenant Loki" />
+										<span class="form-hint">Required when multi-tenant mode is enabled in Loki</span>
+									</div>
+									<div class="form-group">
+										<label class="form-label">Batch Size</label>
+										<input class="form-input" type="number" id="loki-batchSize" min="1" placeholder="50" />
+										<span class="form-hint">Number of log entries per batch (default: 50)</span>
+									</div>
+									<div class="form-group">
+										<label class="form-label">Batch Timeout (ms)</label>
+										<input class="form-input" type="number" id="loki-batchTimeout" min="100" placeholder="5000" />
+										<span class="form-hint">Max ms to wait before sending a partial batch (default: 5000)</span>
+									</div>
+									<div class="form-group">
+										<label class="form-label">Max Queue Size</label>
+										<input class="form-input" type="number" id="loki-maxQueueSize" min="1" placeholder="10000" />
+										<span class="form-hint">Max log entries held in memory while batches are in-flight (default: 10000)</span>
+									</div>
+								</div>
+
+								<hr class="form-divider" />
+								<div class="form-section-title">Labels</div>
+								<div id="loki-labels-list"></div>
+								<button class="btn btn-sm" type="button" id="btn-add-loki-label">
+									<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<line x1="12" y1="5" x2="12" y2="19" />
+										<line x1="5" y1="12" x2="19" y2="12" />
+									</svg>
+									Add Label
+								</button>
+
+								<hr class="form-divider" />
+								<div class="form-section-title">Basic Auth (optional)</div>
+								<div class="form-grid">
+									<div class="form-group">
+										<label class="form-label">Username</label>
+										<input class="form-input" type="text" id="loki-auth-username" placeholder="loki-user" />
+									</div>
+									<div class="form-group">
+										<label class="form-label">Password</label>
+										<input class="form-input" type="password" id="loki-auth-password" placeholder="loki-pass" />
+									</div>
 								</div>
 							</div>
 						</div>

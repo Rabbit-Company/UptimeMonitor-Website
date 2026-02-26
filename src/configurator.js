@@ -243,6 +243,16 @@ document.getElementById("fileInput").addEventListener("change", async (e) => {
 	e.target.value = "";
 });
 
+// Toggle Loki settings visibility
+document.getElementById("loki-enabled").addEventListener("change", (e) => {
+	const lokiSettings = document.getElementById("loki-settings");
+	lokiSettings.style.display = e.target.checked ? "block" : "none";
+	// Pre-populate default labels when first enabled
+	if (e.target.checked && document.querySelectorAll("[data-loki-label-key]").length === 0) {
+		renderLokiLabels({ app: "uptime-monitor", env: "production" });
+	}
+});
+
 function parseTOML(text) {
 	config = TOML.parse(text);
 	if (!config.monitors) config.monitors = [];
@@ -260,7 +270,21 @@ function loadConfigToUI() {
 	document.getElementById("srv-port").value = config.server?.port || "";
 	document.getElementById("srv-proxy").value = config.server?.proxy || "";
 	document.getElementById("srv-reloadToken").value = config.server?.reloadToken || "";
-	document.getElementById("log-level").value = config.logger?.level ?? "";
+	document.getElementById("log-level").value = config.logger?.level ?? "3";
+
+	// Loki transport
+	const lokiEnabled = !!config.logger?.loki;
+	document.getElementById("loki-enabled").checked = lokiEnabled;
+	document.getElementById("loki-settings").style.display = lokiEnabled ? "block" : "none";
+	document.getElementById("loki-url").value = config.logger?.loki?.url || "http://loki:3100";
+	document.getElementById("loki-tenantId").value = config.logger?.loki?.tenantID || "";
+	document.getElementById("loki-batchSize").value = config.logger?.loki?.batchSize || "";
+	document.getElementById("loki-batchTimeout").value = config.logger?.loki?.batchTimeout || "";
+	document.getElementById("loki-maxQueueSize").value = config.logger?.loki?.maxQueueSize || "";
+	document.getElementById("loki-auth-username").value = config.logger?.loki?.basicAuth?.username || "";
+	document.getElementById("loki-auth-password").value = config.logger?.loki?.basicAuth?.password || "";
+	renderLokiLabels(config.logger?.loki?.labels || { app: "uptime-monitor", env: "production" });
+
 	document.getElementById("mpd-interval").value = config.missingPulseDetector?.interval || "";
 	document.getElementById("sm-enabled").checked = config.selfMonitoring?.enabled || false;
 	document.getElementById("sm-id").value = config.selfMonitoring?.id || "";
@@ -308,6 +332,35 @@ function readGeneralFromUI() {
 		level: Number(logLevel) || 3,
 	};
 
+	// Loki transport
+	if (document.getElementById("loki-enabled").checked) {
+		const lokiUrl = document.getElementById("loki-url").value.trim();
+		const lokiTenantId = document.getElementById("loki-tenantId").value.trim();
+		const lokiBatchSize = document.getElementById("loki-batchSize").value;
+		const lokiBatchTimeout = document.getElementById("loki-batchTimeout").value;
+		const lokiMaxQueueSize = document.getElementById("loki-maxQueueSize").value;
+		const lokiAuthUser = document.getElementById("loki-auth-username").value.trim();
+		const lokiAuthPass = document.getElementById("loki-auth-password").value.trim();
+
+		config.logger.loki = {};
+		if (lokiUrl) config.logger.loki.url = lokiUrl;
+		if (lokiTenantId) config.logger.loki.tenantID = lokiTenantId;
+		if (lokiBatchSize) config.logger.loki.batchSize = Number(lokiBatchSize);
+		if (lokiBatchTimeout) config.logger.loki.batchTimeout = Number(lokiBatchTimeout);
+		if (lokiMaxQueueSize) config.logger.loki.maxQueueSize = Number(lokiMaxQueueSize);
+
+		// Labels
+		const labels = readLokiLabelsFromUI();
+		if (Object.keys(labels).length > 0) config.logger.loki.labels = labels;
+
+		// Basic Auth
+		if (lokiAuthUser || lokiAuthPass) {
+			config.logger.loki.basicAuth = {};
+			if (lokiAuthUser) config.logger.loki.basicAuth.username = lokiAuthUser;
+			if (lokiAuthPass) config.logger.loki.basicAuth.password = lokiAuthPass;
+		}
+	}
+
 	const mpdInterval = document.getElementById("mpd-interval").value;
 	config.missingPulseDetector = {
 		interval: Number(mpdInterval) || 5,
@@ -333,6 +386,98 @@ function readGeneralFromUI() {
 		token: adminToken || token(),
 	};
 }
+
+function renderLokiLabels(labels) {
+	const container = document.getElementById("loki-labels-list");
+	const entries = Object.entries(labels);
+	if (entries.length === 0) {
+		container.innerHTML =
+			'<p style="color: var(--text-subtle); font-size: 0.85rem; margin-bottom: 8px;">No labels configured. Click "Add Label" to add one.</p>';
+		return;
+	}
+	container.innerHTML = entries
+		.map(
+			([key, value], i) => `
+		<div class="form-grid" style="margin-bottom: 8px;">
+			<div class="form-group">
+				<label class="form-label">Key</label>
+				<input class="form-input mono" type="text" value="${esc(key)}" data-loki-label-key="${i}" />
+			</div>
+			<div class="form-group">
+				<label class="form-label">Value</label>
+				<input class="form-input mono" type="text" value="${esc(String(value))}" data-loki-label-value="${i}" />
+			</div>
+			<div class="form-group" style="justify-content: flex-end;">
+				<button class="btn-icon danger" type="button" data-action="remove-loki-label" data-idx="${i}" title="Remove label>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+				</button>
+			</div>
+		</div>`,
+		)
+		.join("");
+}
+
+function renderLokiLabels(labels) {
+	const container = document.getElementById("loki-labels-list");
+	const entries = Object.entries(labels);
+	if (entries.length === 0) {
+		container.innerHTML =
+			'<p style="color: var(--text-subtle); font-size: 0.85rem; margin-bottom: 8px;">No labels configured. Click "Add Label" to add one.</p>';
+		return;
+	}
+	container.innerHTML = entries
+		.map(
+			([key, value], i) => `
+		<div class="form-grid" style="margin-bottom: 8px;">
+			<div class="form-group">
+				<label class="form-label">Key</label>
+				<input class="form-input mono" type="text" value="${esc(key)}" data-loki-label-key="${i}" />
+			</div>
+			<div class="form-group">
+				<label class="form-label">Value</label>
+				<input class="form-input mono" type="text" value="${esc(String(value))}" data-loki-label-value="${i}" />
+			</div>
+			<div class="form-group" style="justify-content: flex-end;">
+				<button class="btn-icon danger" type="button" data-action="remove-loki-label" data-idx="${i}" title="Remove label">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+				</button>
+			</div>
+		</div>`,
+		)
+		.join("");
+}
+
+function readLokiLabelsFromUI() {
+	const labels = {};
+	const keys = document.querySelectorAll("[data-loki-label-key]");
+	const values = document.querySelectorAll("[data-loki-label-value]");
+	keys.forEach((keyEl, i) => {
+		const k = keyEl.value.trim();
+		const v = values[i]?.value.trim() || "";
+		if (k) labels[k] = v;
+	});
+	return labels;
+}
+
+// Add Label button
+document.getElementById("btn-add-loki-label").addEventListener("click", () => {
+	const current = readLokiLabelsFromUI();
+	current[""] = "";
+	renderLokiLabels(current);
+	const allKeys = document.querySelectorAll("[data-loki-label-key]");
+	allKeys[allKeys.length - 1]?.focus();
+});
+
+// Remove Label buttons (delegated)
+document.getElementById("loki-labels-list").addEventListener("click", (e) => {
+	const btn = e.target.closest('[data-action="remove-loki-label"]');
+	if (!btn) return;
+	const idx = Number(btn.dataset.idx);
+	const current = readLokiLabelsFromUI();
+	const entries = Object.entries(current);
+	entries.splice(idx, 1);
+	renderLokiLabels(Object.fromEntries(entries));
+});
 
 function addMonitor() {
 	// Persist any unsaved edits in the current list before mutating
