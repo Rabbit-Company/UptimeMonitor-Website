@@ -566,6 +566,12 @@ function flushBindings(container) {
 			delete config.notifications.channels[key].webhook.headers;
 		}
 	});
+
+	// Flush SNMP OIDs
+	container.querySelectorAll('[data-action="snmp-oid-key"]').forEach((el) => {
+		flushSnmpOids(Number(el.dataset.idx));
+	});
+
 	isFlushing = false;
 }
 
@@ -587,7 +593,22 @@ function renderMonitors() {
 }
 
 function renderMonitorCard(m, idx) {
-	const pulseProtocols = ["http", "ws", "tcp", "udp", "icmp", "smtp", "imap", "mysql", "mssql", "postgresql", "redis", "minecraft-java", "minecraft-bedrock"];
+	const pulseProtocols = [
+		"http",
+		"ws",
+		"tcp",
+		"udp",
+		"icmp",
+		"smtp",
+		"imap",
+		"mysql",
+		"mssql",
+		"postgresql",
+		"redis",
+		"snmp",
+		"minecraft-java",
+		"minecraft-bedrock",
+	];
 	const currentProtocol = m.pulse ? Object.keys(m.pulse)[0] || "" : "";
 
 	return `
@@ -778,6 +799,10 @@ function renderPulseFields(idx, pulse) {
 		],
 	};
 
+	if (proto === "snmp") {
+		return renderSnmpFields(idx, p);
+	}
+
 	const fieldSet = fields[proto] || [];
 	return `<div class="form-grid" style="margin-top:12px">
 ${fieldSet
@@ -800,6 +825,211 @@ ${fieldSet
 	})
 	.join("")}
 </div>`;
+}
+
+function renderSnmpFields(idx, p) {
+	const version = p.version || "3";
+	const securityLevel = p.securityLevel || "authPriv";
+	const oids = p.oids || {};
+	const oidEntries = Object.entries(oids);
+
+	const isV3 = version === "3";
+	const showPriv = isV3 && securityLevel === "authPriv";
+	const showAuth = isV3 && (securityLevel === "authNoPriv" || securityLevel === "authPriv");
+
+	let html = `<div class="form-grid" style="margin-top:12px">
+<div class="form-group">
+	<label class="form-label">Host <span class="required">*</span></label>
+	<input class="form-input mono" type="text" value="${esc(p.host || "")}"
+		data-bind="monitors.${idx}.pulse.snmp.host" placeholder="192.168.1.1" />
+</div>
+<div class="form-group">
+	<label class="form-label">Port</label>
+	<input class="form-input" type="number" value="${p.port ?? 161}"
+		data-bind="monitors.${idx}.pulse.snmp.port" data-type="number" />
+</div>
+<div class="form-group">
+	<label class="form-label">Version</label>
+	<select class="form-select" data-bind="monitors.${idx}.pulse.snmp.version" data-action="set-snmp-version" data-idx="${idx}">
+		<option value="1" ${version === "1" ? "selected" : ""}>1</option>
+		<option value="2c" ${version === "2c" ? "selected" : ""}>2c</option>
+		<option value="3" ${version === "3" ? "selected" : ""}>3</option>
+	</select>
+</div>
+<div class="form-group">
+	<label class="form-label">Timeout (s)</label>
+	<input class="form-input" type="number" value="${p.timeout ?? 3}"
+		data-bind="monitors.${idx}.pulse.snmp.timeout" data-type="number" />
+</div>
+<div class="form-group full-width">
+	<label class="form-label">Primary OID</label>
+	<input class="form-input mono" type="text" value="${esc(p.oid || "1.3.6.1.2.1.1.3.0")}"
+		data-bind="monitors.${idx}.pulse.snmp.oid" placeholder="1.3.6.1.2.1.1.3.0" />
+	<span class="form-hint">OID for availability check (default: sysUpTime). Must be numeric dot-notation.</span>
+</div>`;
+
+	// v1/v2c: community string
+	if (!isV3) {
+		html += `
+<div class="form-group full-width">
+	<label class="form-label">Community</label>
+	<input class="form-input mono" type="text" value="${esc(p.community || "public")}"
+		data-bind="monitors.${idx}.pulse.snmp.community" placeholder="public" />
+</div>`;
+	}
+
+	// v3: security settings
+	if (isV3) {
+		html += `
+<div class="form-group">
+	<label class="form-label">Security Level</label>
+	<select class="form-select" data-bind="monitors.${idx}.pulse.snmp.securityLevel" data-action="set-snmp-version" data-idx="${idx}">
+		<option value="noAuthNoPriv" ${securityLevel === "noAuthNoPriv" ? "selected" : ""}>noAuthNoPriv</option>
+		<option value="authNoPriv" ${securityLevel === "authNoPriv" ? "selected" : ""}>authNoPriv</option>
+		<option value="authPriv" ${securityLevel === "authPriv" ? "selected" : ""}>authPriv</option>
+	</select>
+</div>
+<div class="form-group">
+	<label class="form-label">Username <span class="required">*</span></label>
+	<input class="form-input mono" type="text" value="${esc(p.username || "")}"
+		data-bind="monitors.${idx}.pulse.snmp.username" />
+</div>`;
+
+		if (showAuth) {
+			html += `
+<div class="form-group">
+	<label class="form-label">Auth Password <span class="required">*</span></label>
+	<input class="form-input mono" type="text" value="${esc(p.authPassword || "")}"
+		data-bind="monitors.${idx}.pulse.snmp.authPassword" />
+</div>
+<div class="form-group">
+	<label class="form-label">Auth Protocol</label>
+	<select class="form-select" data-bind="monitors.${idx}.pulse.snmp.authProtocol">
+		${["md5", "sha1", "sha224", "sha256", "sha384", "sha512"].map((o) => `<option value="${o}" ${(p.authProtocol || "sha256") === o ? "selected" : ""}>${o}</option>`).join("")}
+	</select>
+</div>`;
+		}
+
+		if (showPriv) {
+			html += `
+<div class="form-group">
+	<label class="form-label">Privacy Password <span class="required">*</span></label>
+	<input class="form-input mono" type="text" value="${esc(p.privPassword || "")}"
+		data-bind="monitors.${idx}.pulse.snmp.privPassword" />
+</div>
+<div class="form-group">
+	<label class="form-label">Privacy Cipher</label>
+	<select class="form-select" data-bind="monitors.${idx}.pulse.snmp.privCipher">
+		${["des", "aes128", "aes192", "aes256"].map((o) => `<option value="${o}" ${(p.privCipher || "aes128") === o ? "selected" : ""}>${o}</option>`).join("")}
+	</select>
+</div>`;
+		}
+	}
+
+	html += `</div>`;
+
+	// OIDs editor
+	html += `
+<div class="form-section-title" style="margin-top:16px">Custom OIDs</div>
+<span class="form-hint" style="display:block;margin-bottom:8px">Map placeholder names to OIDs. Entries named custom1, custom2, custom3 populate custom metric fields.</span>
+<div id="snmp-oids-${idx}">
+${renderSnmpOidRows(idx, oidEntries)}
+</div>
+<button class="btn btn-secondary btn-sm" data-action="add-snmp-oid" data-idx="${idx}" style="margin-top:8px">
+	<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+		<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+	</svg>
+	Add OID
+</button>`;
+
+	return html;
+}
+
+function renderSnmpOidRows(idx, entries) {
+	if (entries.length === 0) return "";
+	return entries
+		.map(
+			([key, val], i) => `
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+	<input class="form-input mono" type="text" value="${esc(key)}" placeholder="custom1"
+		data-action="snmp-oid-key" data-idx="${idx}" data-oid-idx="${i}" style="flex:1" />
+	<input class="form-input mono" type="text" value="${esc(val)}" placeholder="1.3.6.1.4.1.2021.11.11.0"
+		data-action="snmp-oid-val" data-idx="${idx}" data-oid-idx="${i}" style="flex:2" />
+	<button class="btn-icon danger" data-action="remove-snmp-oid" data-idx="${idx}" data-oid-idx="${i}" title="Remove OID">
+		<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+	</button>
+</div>`,
+		)
+		.join("");
+}
+
+function flushSnmpOids(idx) {
+	const container = document.getElementById(`snmp-oids-${idx}`);
+	if (!container) return;
+	const keys = container.querySelectorAll('[data-action="snmp-oid-key"]');
+	const vals = container.querySelectorAll('[data-action="snmp-oid-val"]');
+	const oids = {};
+	keys.forEach((keyEl, i) => {
+		const k = keyEl.value.trim();
+		const v = vals[i]?.value.trim() || "";
+		if (k) oids[k] = v;
+	});
+	if (!config.monitors[idx].pulse) return;
+	if (!config.monitors[idx].pulse.snmp) return;
+	if (Object.keys(oids).length > 0) {
+		config.monitors[idx].pulse.snmp.oids = oids;
+	} else {
+		delete config.monitors[idx].pulse.snmp.oids;
+	}
+}
+
+function addSnmpOid(idx) {
+	flushSnmpOids(idx);
+	const snmp = config.monitors[idx]?.pulse?.snmp;
+	if (!snmp) return;
+	if (!snmp.oids) snmp.oids = {};
+	// Find next available custom key
+	let nextKey = "";
+	for (let n = 1; n <= 3; n++) {
+		if (!snmp.oids[`custom${n}`]) {
+			nextKey = `custom${n}`;
+			break;
+		}
+	}
+	snmp.oids[nextKey] = "";
+	const container = document.getElementById(`snmp-oids-${idx}`);
+	container.innerHTML = renderSnmpOidRows(idx, Object.entries(snmp.oids));
+	bindSnmpOidEvents(container);
+}
+
+function removeSnmpOid(idx, oidIdx) {
+	flushSnmpOids(idx);
+	const snmp = config.monitors[idx]?.pulse?.snmp;
+	if (!snmp?.oids) return;
+	const entries = Object.entries(snmp.oids);
+	entries.splice(oidIdx, 1);
+	snmp.oids = Object.fromEntries(entries);
+	if (Object.keys(snmp.oids).length === 0) delete snmp.oids;
+	const container = document.getElementById(`snmp-oids-${idx}`);
+	container.innerHTML = renderSnmpOidRows(idx, Object.entries(snmp.oids || {}));
+	bindSnmpOidEvents(container);
+}
+
+function reRenderSnmpFields(idx) {
+	flushBindings(document.getElementById(`pulse-fields-${idx}`));
+	flushSnmpOids(idx);
+	const container = document.getElementById(`pulse-fields-${idx}`);
+	container.innerHTML = renderPulseFields(idx, config.monitors[idx].pulse);
+	bindDynamicEvents(container);
+	bindSnmpOidEvents(container);
+}
+
+function bindSnmpOidEvents(container) {
+	container.querySelectorAll('[data-action="snmp-oid-key"], [data-action="snmp-oid-val"]').forEach((el) => {
+		el.addEventListener("change", () => {
+			flushSnmpOids(Number(el.dataset.idx));
+		});
+	});
 }
 
 function addGroup() {
@@ -1963,6 +2193,9 @@ function bindDynamicEvents(container) {
 		});
 	});
 
+	// Bind SNMP OID key/value change events
+	bindSnmpOidEvents(container);
+
 	// Webhook headers textarea: parse "Key: Value" lines into an object
 	container.querySelectorAll('[data-action="webhook-headers"]').forEach((el) => {
 		el.addEventListener("change", () => {
@@ -2086,6 +2319,16 @@ document.body.addEventListener("click", (e) => {
 			break;
 		case "toggle-token-visibility":
 			toggleTokenVisibility();
+			break;
+		case "add-snmp-oid":
+			addSnmpOid(idx);
+			break;
+		case "remove-snmp-oid":
+			removeSnmpOid(idx, Number(btn.dataset.oidIdx));
+			break;
+		case "set-snmp-version":
+			handleBind(btn);
+			reRenderSnmpFields(idx);
 			break;
 	}
 });
