@@ -6,11 +6,11 @@ The official marketing website for the Uptime Monitor project - an open-source, 
 
 ## Related Projects
 
-| Repository                                                                             | Description                                                                        |
-| -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| [UptimeMonitor-Server](https://github.com/Rabbit-Company/UptimeMonitor-Server)         | Central monitoring server with REST API, WebSocket updates, and ClickHouse storage |
-| [UptimeMonitor-StatusPage](https://github.com/Rabbit-Company/UptimeMonitor-StatusPage) | Beautiful, customizable status page frontend with 15 themes                        |
-| [PulseMonitor](https://github.com/Rabbit-Company/PulseMonitor)                         | Distributed monitoring agent supporting 11 protocols                               |
+| Repository                                                                             | Description                                                                       |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| [UptimeMonitor-Server](https://github.com/Rabbit-Company/UptimeMonitor-Server)         | Central monitoring server with REST API, WebSocket updates and ClickHouse storage |
+| [UptimeMonitor-StatusPage](https://github.com/Rabbit-Company/UptimeMonitor-StatusPage) | Beautiful, customizable status page frontend with 15 themes                       |
+| [PulseMonitor](https://github.com/Rabbit-Company/PulseMonitor)                         | Distributed monitoring agent supporting 16 protocols                              |
 
 ## Live Demo
 

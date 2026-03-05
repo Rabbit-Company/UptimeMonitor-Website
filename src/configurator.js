@@ -1436,7 +1436,7 @@ function renderNotifications() {
 	<label class="form-label">Chat ID</label>
 	<input class="form-input mono" type="text" value="${esc(ch.telegram?.chatId || "")}" placeholder="-1001234567890"
 		data-bind="notifications.channels.${key}.telegram.chatId" data-ensure="notifications.channels.${key}.telegram" />
-	<span class="form-hint">User, group, or channel ID</span>
+	<span class="form-hint">User, group or channel ID</span>
 </div>
 <div class="form-group">
 	<label class="form-label">Topic ID</label>
