@@ -6,6 +6,7 @@ import TOML from "smol-toml";
 cytoscape.use(dagre);
 
 let config = {
+	database: { url: "" },
 	clickhouse: { url: "" },
 	server: {},
 	adminAPI: {},
@@ -266,6 +267,7 @@ function parseTOML(text) {
 }
 
 function loadConfigToUI() {
+	document.getElementById("db-url").value = config.database?.url || "";
 	document.getElementById("ch-url").value = config.clickhouse?.url || "";
 	document.getElementById("srv-port").value = config.server?.port || "";
 	document.getElementById("srv-proxy").value = config.server?.proxy || "";
@@ -313,6 +315,11 @@ function updateBadges() {
 }
 
 function readGeneralFromUI() {
+	const dbUrl = document.getElementById("db-url").value.trim();
+	config.database = {
+		url: dbUrl || "sqlite://./databases/uptime_monitor.db",
+	};
+
 	const url = document.getElementById("ch-url").value.trim();
 	config.clickhouse = {
 		url: url || "http://uptime_user:uptime_password@clickhouse:8123/uptime_monitor",
@@ -1742,6 +1749,7 @@ function exportConfig() {
 function resetConfig() {
 	if (!confirm("Reset all configuration? This cannot be undone.")) return;
 	config = {
+		database: {},
 		clickhouse: { url: "" },
 		server: {},
 		adminAPI: {},
@@ -1925,6 +1933,9 @@ document.addEventListener("keydown", (e) => {
 
 function loadExample() {
 	const example = `# Uptime Monitor - Example Configuration
+
+[database]
+url = "sqlite://./databases/uptime_monitor.db"
 
 [clickhouse]
 url = "http://uptime_user:uptime_password@clickhouse:8123/uptime_monitor"

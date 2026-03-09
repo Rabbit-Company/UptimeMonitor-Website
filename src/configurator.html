@@ -154,6 +154,26 @@
 
 					<!-- General Tab -->
 					<div class="tab-panel active" id="panel-general">
+						<!-- Database -->
+						<div class="config-card">
+							<div class="config-card-header">
+								<div class="config-card-title">
+									<h3>Database</h3>
+									<span class="badge">Required</span>
+								</div>
+							</div>
+							<div class="form-grid">
+								<div class="form-group full-width">
+									<label class="form-label">Connection URL <span class="required">*</span></label>
+									<input class="form-input mono" type="text" id="db-url" placeholder="sqlite://./databases/uptime_monitor.db" />
+									<span class="form-hint"
+										>SQLite: sqlite://./databases/uptime_monitor.db &nbsp;|&nbsp; PostgreSQL: postgres://user:password@localhost:5432/uptime_monitor
+										&nbsp;|&nbsp; MySQL: mysql://user:password@localhost:3306/uptime_monitor</span
+									>
+								</div>
+							</div>
+						</div>
+
 						<!-- ClickHouse -->
 						<div class="config-card">
 							<div class="config-card-header">
