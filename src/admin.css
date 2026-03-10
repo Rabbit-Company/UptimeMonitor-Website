@@ -34,7 +34,81 @@
 }
 
 /*
-	Status & Severity Badges
+	Admin Tabs
+*/
+
+.admin-tabs {
+	display: flex;
+	gap: 4px;
+	margin-bottom: 24px;
+	background: var(--bg-surface);
+	border: 1px solid var(--border-subtle);
+	border-radius: 12px;
+	padding: 4px;
+	overflow-x: auto;
+}
+.admin-tab {
+	padding: 10px 24px;
+	font-size: 0.9rem;
+	font-weight: 500;
+	font-family: inherit;
+	color: var(--text-muted);
+	background: transparent;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	white-space: nowrap;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.admin-tab:hover {
+	color: var(--text-secondary);
+}
+.admin-tab.active {
+	background: var(--bg-elevated);
+	color: var(--accent-primary);
+}
+.admin-tab svg {
+	flex-shrink: 0;
+}
+.admin-tab-panel {
+	display: none;
+	animation: fadeIn 0.3s ease;
+}
+.admin-tab-panel.active {
+	display: block;
+}
+
+/*
+	Connected Toolbar
+*/
+
+.admin-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 24px;
+	gap: 12px;
+}
+.admin-toolbar-info {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-size: 0.85rem;
+	color: var(--text-muted);
+}
+.admin-toolbar-info code {
+	background: var(--bg-elevated);
+	padding: 2px 8px;
+	border-radius: 4px;
+	font-size: 0.8rem;
+	color: var(--accent-primary);
+}
+
+/*
+	Incident & Maintenance Status Badges
 */
 
 .status-badge {
@@ -53,6 +127,8 @@
 	height: 6px;
 	border-radius: 50%;
 }
+
+/* Incident statuses */
 .status-investigating {
 	background: rgba(59, 130, 246, 0.12);
 	color: #60a5fa;
@@ -82,6 +158,40 @@
 	background: #34d399;
 }
 
+/* Maintenance statuses */
+.maint-status-scheduled {
+	background: rgba(59, 130, 246, 0.12);
+	color: #60a5fa;
+}
+.maint-status-scheduled::before {
+	background: #60a5fa;
+}
+.maint-status-in_progress {
+	background: rgba(245, 158, 11, 0.12);
+	color: #fbbf24;
+}
+.maint-status-in_progress::before {
+	background: #fbbf24;
+}
+.maint-status-completed {
+	background: rgba(16, 185, 129, 0.12);
+	color: #34d399;
+}
+.maint-status-completed::before {
+	background: #34d399;
+}
+.maint-status-cancelled {
+	background: rgba(107, 114, 128, 0.15);
+	color: #9ca3af;
+}
+.maint-status-cancelled::before {
+	background: #9ca3af;
+}
+
+/*
+	Severity Badges (incidents only)
+*/
+
 .severity-badge {
 	display: inline-flex;
 	align-items: center;
@@ -105,10 +215,42 @@
 }
 
 /*
-	Incident Cards
+	Maintenance suppress badge
 */
 
-.incident-card {
+.maint-suppress-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 4px;
+	font-size: 0.7rem;
+	font-weight: 500;
+	background: rgba(139, 92, 246, 0.1);
+	color: #a78bfa;
+}
+
+/*
+	Incident suppress badge
+*/
+
+.incident-suppress-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 4px;
+	font-size: 0.7rem;
+	font-weight: 500;
+	background: rgba(139, 92, 246, 0.1);
+	color: #a78bfa;
+}
+
+/*
+	Item Cards (shared between incidents & maintenances)
+*/
+
+.item-card {
 	background: var(--bg-surface);
 	border: 1px solid var(--border-subtle);
 	border-radius: 16px;
@@ -116,36 +258,36 @@
 	transition: border-color 0.2s ease;
 	overflow: hidden;
 }
-.incident-card:hover {
+.item-card:hover {
 	border-color: var(--border-default);
 }
-.incident-card-header {
+.item-card-header {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
 	padding: 24px 28px 16px;
 	gap: 16px;
 }
-.incident-card-info {
+.item-card-info {
 	flex: 1;
 	min-width: 0;
 }
-.incident-card-info h3 {
+.item-card-info h3 {
 	font-size: 1.1rem;
 	margin-bottom: 8px;
 	word-break: break-word;
 }
-.incident-meta {
+.item-meta {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
 	align-items: center;
 }
-.incident-meta-text {
+.item-meta-text {
 	font-size: 0.8rem;
 	color: var(--text-subtle);
 }
-.incident-monitors {
+.item-monitors {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 4px;
@@ -167,7 +309,7 @@
 	Timeline
 */
 
-.incident-timeline {
+.item-timeline {
 	border-top: 1px solid var(--border-subtle);
 	padding: 20px 28px;
 }
@@ -200,6 +342,8 @@
 	border-radius: 50%;
 	margin-top: 6px;
 }
+
+/* Incident timeline dots */
 .timeline-entry-dot.investigating {
 	background: #60a5fa;
 }
@@ -212,6 +356,21 @@
 .timeline-entry-dot.resolved {
 	background: #34d399;
 }
+
+/* Maintenance timeline dots */
+.timeline-entry-dot.maint-scheduled {
+	background: #60a5fa;
+}
+.timeline-entry-dot.maint-in_progress {
+	background: #fbbf24;
+}
+.timeline-entry-dot.maint-completed {
+	background: #34d399;
+}
+.timeline-entry-dot.maint-cancelled {
+	background: #9ca3af;
+}
+
 .timeline-entry-content {
 	flex: 1;
 	min-width: 0;
@@ -227,6 +386,8 @@
 	font-weight: 600;
 	text-transform: capitalize;
 }
+
+/* Incident timeline statuses */
 .timeline-entry-status.investigating {
 	color: #60a5fa;
 }
@@ -239,6 +400,21 @@
 .timeline-entry-status.resolved {
 	color: #34d399;
 }
+
+/* Maintenance timeline statuses */
+.timeline-entry-status.maint-scheduled {
+	color: #60a5fa;
+}
+.timeline-entry-status.maint-in_progress {
+	color: #fbbf24;
+}
+.timeline-entry-status.maint-completed {
+	color: #34d399;
+}
+.timeline-entry-status.maint-cancelled {
+	color: #9ca3af;
+}
+
 .timeline-entry-time {
 	font-size: 0.75rem;
 	color: var(--text-subtle);
@@ -292,6 +468,61 @@
 }
 
 /*
+	Button Overrides
+*/
+
+.btn-danger {
+	background: rgba(239, 68, 68, 0.15);
+	color: #ef4444;
+	border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.btn-danger:hover {
+	background: rgba(239, 68, 68, 0.25);
+}
+.btn-sm {
+	padding: 8px 16px;
+	font-size: 0.85rem;
+	border-radius: 8px;
+}
+
+/*
+	Toolbar
+*/
+
+.toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 24px;
+	flex-wrap: wrap;
+}
+.toolbar-group {
+	display: flex;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+.filter-select {
+	min-width: 150px;
+}
+
+/*
+	Disconnect button
+*/
+
+.btn-disconnect {
+	background: rgba(239, 68, 68, 0.08);
+	color: #f87171;
+	border: 1px solid rgba(239, 68, 68, 0.2);
+	padding: 8px 16px;
+	font-size: 0.85rem;
+}
+.btn-disconnect:hover {
+	background: rgba(239, 68, 68, 0.15);
+	border-color: rgba(239, 68, 68, 0.35);
+}
+
+/*
 	Modal Override
 */
 
@@ -300,7 +531,7 @@
 }
 
 /*
-	Page-Specific Responsive
+	Responsive
 */
 
 @media (max-width: 1150px) {
@@ -314,13 +545,9 @@
 	.toolbar-group {
 		justify-content: center;
 	}
-	.tabs {
+	.admin-tabs {
 		overflow-x: auto;
 		-webkit-overflow-scrolling: touch;
-	}
-	.footer-grid {
-		grid-template-columns: repeat(2, 1fr);
-		gap: 48px;
 	}
 }
 
@@ -340,17 +567,22 @@
 		width: 100%;
 		min-width: unset;
 	}
-	.incident-card-header {
+	.item-card-header {
 		flex-direction: column;
 		padding: 20px;
 	}
-	.incident-monitors {
+	.item-monitors {
 		padding: 0 20px 16px;
 	}
-	.incident-timeline {
+	.item-timeline {
 		padding: 16px 20px;
 	}
 	.timeline-toggle {
 		padding: 12px 20px;
+	}
+	.admin-toolbar {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
 	}
 }

@@ -7,7 +7,7 @@ await fs.mkdir("./dist", { recursive: true });
 
 try {
 	const result = await Bun.build({
-		entrypoints: ["./src/index.html", "./src/configurator.html", "./src/incidents.html"],
+		entrypoints: ["./src/index.html", "./src/configurator.html", "./src/admin.html"],
 		outdir: "./dist",
 		target: "browser",
 		format: "esm",

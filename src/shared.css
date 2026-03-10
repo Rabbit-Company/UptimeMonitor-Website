@@ -301,7 +301,7 @@ a:hover {
 }
 
 /*
-	Page Hero (shared between configurator & incidents)
+	Page Hero
 */
 
 .page-hero {
@@ -348,7 +348,7 @@ a:hover {
 }
 
 /*
-	Config Main (shared between configurator & incidents)
+	Config Main
 */
 
 .config-main {
@@ -368,7 +368,7 @@ a:hover {
 }
 
 /*
-	Config Card (shared between configurator & incidents)
+	Config Card
 */
 
 .config-card {
@@ -403,7 +403,7 @@ a:hover {
 }
 
 /*
-	Forms (shared between configurator & incidents)
+	Forms
 */
 
 .form-grid {
@@ -496,7 +496,7 @@ a:hover {
 }
 
 /*
-	Toolbar (shared between configurator & incidents)
+	Toolbar
 */
 
 .toolbar {
@@ -517,7 +517,7 @@ a:hover {
 }
 
 /*
-	Empty State (shared between configurator & incidents)
+	Empty State
 */
 
 .empty-state {
@@ -540,7 +540,7 @@ a:hover {
 }
 
 /*
-	Modal (shared between configurator & incidents)
+	Modal
 */
 
 .modal-overlay {
@@ -609,7 +609,7 @@ a:hover {
 }
 
 /*
-	Input with Toggle (shared between configurator & incidents)
+	Input with Toggle
 */
 
 .input-with-toggle {

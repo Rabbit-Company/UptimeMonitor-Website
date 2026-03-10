@@ -3,15 +3,15 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Incident Manager - Uptime Monitor</title>
+		<title>Admin Panel - Uptime Monitor</title>
 		<meta
 			name="description"
-			content="Manage incident reports for your Uptime Monitor status pages. Create, update and resolve incidents with timeline updates."
+			content="Manage incidents and maintenances for your Uptime Monitor status pages. Create, update and resolve incidents and schedule maintenance windows."
 		/>
 		<link rel="icon" type="image/svg+xml" href="logo.svg" />
 
 		<link rel="stylesheet" href="shared.css" />
-		<link rel="stylesheet" href="incidents.css" />
+		<link rel="stylesheet" href="admin.css" />
 	</head>
 	<body>
 		<!-- Header -->
@@ -30,7 +30,7 @@
 							<li><a href="/#architecture">Architecture</a></li>
 							<li><a href="/#demo">Demo</a></li>
 							<li><a href="configurator.html">Configurator</a></li>
-							<li><a href="#">Incidents</a></li>
+							<li><a href="#">Admin</a></li>
 							<li>
 								<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/tree/main/docs" target="_blank">Docs</a>
 							</li>
@@ -64,7 +64,7 @@
 						<li><a href="/#architecture">Architecture</a></li>
 						<li><a href="/#demo">Demo</a></li>
 						<li><a href="configurator.html">Configurator</a></li>
-						<li><a href="#">Incidents</a></li>
+						<li><a href="#">Admin</a></li>
 						<li>
 							<a href="https://github.com/Rabbit-Company/UptimeMonitor-Server/tree/main/docs" target="_blank">Docs</a>
 						</li>
@@ -89,8 +89,8 @@
 			<section class="page-hero">
 				<div class="container">
 					<div class="page-hero-content">
-						<h1><span class="gradient">Incident</span> Manager</h1>
-						<p>Create, manage and resolve incident reports for your status pages directly from the browser.</p>
+						<h1><span class="gradient">Admin</span> Panel</h1>
+						<p>Manage incidents and maintenances for your status pages directly from the browser.</p>
 					</div>
 				</div>
 			</section>
@@ -133,7 +133,7 @@
 							<div class="form-group">
 								<label class="form-label">Status Page ID <span class="required">*</span></label>
 								<input type="text" class="form-input" id="status-page-id" placeholder="e.g. main, public" />
-								<span class="form-hint">ID of the status page to manage incidents for</span>
+								<span class="form-hint">ID of the status page to manage</span>
 							</div>
 						</div>
 						<div class="connection-actions">
@@ -144,58 +144,126 @@
 								</svg>
 								<span>Connect</span>
 							</button>
-							<label class="form-check">
-								<input type="checkbox" id="remember-credentials" checked />
-								<span class="form-check-label">Remember credentials</span>
-							</label>
 						</div>
 					</div>
 
-					<!-- Incidents Panel (shown after connection) -->
-					<div id="incidents-panel" style="display: none">
-						<!-- Toolbar -->
-						<div class="toolbar">
-							<div class="toolbar-group">
-								<button class="btn btn-primary" id="btn-new-incident">
-									<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-										<circle cx="12" cy="12" r="10" />
-										<line x1="12" y1="8" x2="12" y2="16" />
-										<line x1="8" y1="12" x2="16" y2="12" />
-									</svg>
-									New Incident
-								</button>
-								<button class="btn btn-secondary" id="btn-refresh">
-									<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-										<polyline points="23 4 23 10 17 10" />
-										<polyline points="1 20 1 14 7 14" />
-										<path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
-									</svg>
-									Refresh
-								</button>
+					<!-- Admin Panel (shown after connection) -->
+					<div id="admin-panel" style="display: none">
+						<!-- Connected toolbar with disconnect -->
+						<div class="admin-toolbar">
+							<div class="admin-toolbar-info">
+								<span class="badge badge-connected">Connected</span>
+								<span>Status Page: <code id="connected-sp-id"></code></span>
 							</div>
-							<div class="toolbar-group">
-								<div class="filter-group">
-									<select class="form-select filter-select" id="filter-status">
-										<option value="">All Statuses</option>
-										<option value="investigating">Investigating</option>
-										<option value="identified">Identified</option>
-										<option value="monitoring">Monitoring</option>
-										<option value="resolved">Resolved</option>
-									</select>
-								</div>
-								<div class="filter-group">
-									<select class="form-select filter-select" id="filter-severity">
-										<option value="">All Severities</option>
-										<option value="minor">Minor</option>
-										<option value="major">Major</option>
-										<option value="critical">Critical</option>
-									</select>
-								</div>
-							</div>
+							<button class="btn btn-disconnect" id="btn-disconnect">
+								<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+									<polyline points="16 17 21 12 16 7" />
+									<line x1="21" y1="12" x2="9" y2="12" />
+								</svg>
+								Disconnect
+							</button>
 						</div>
 
-						<!-- Incidents List -->
-						<div id="incidents-list"></div>
+						<!-- Tabs -->
+						<div class="admin-tabs">
+							<button class="admin-tab active" data-tab="incidents">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+									<line x1="12" y1="9" x2="12" y2="13" />
+									<line x1="12" y1="17" x2="12.01" y2="17" />
+								</svg>
+								Incidents
+							</button>
+							<button class="admin-tab" data-tab="maintenances">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path
+										d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"
+									/>
+								</svg>
+								Maintenances
+							</button>
+						</div>
+
+						<!-- INCIDENTS TAB -->
+						<div class="admin-tab-panel active" id="panel-incidents">
+							<div class="toolbar">
+								<div class="toolbar-group">
+									<button class="btn btn-primary" id="btn-new-incident">
+										<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<circle cx="12" cy="12" r="10" />
+											<line x1="12" y1="8" x2="12" y2="16" />
+											<line x1="8" y1="12" x2="16" y2="12" />
+										</svg>
+										New Incident
+									</button>
+									<button class="btn btn-secondary" id="btn-refresh-incidents">
+										<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<polyline points="23 4 23 10 17 10" />
+											<polyline points="1 20 1 14 7 14" />
+											<path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+										</svg>
+										Refresh
+									</button>
+								</div>
+								<div class="toolbar-group">
+									<div class="filter-group">
+										<select class="form-select filter-select" id="filter-incident-status">
+											<option value="">All Statuses</option>
+											<option value="investigating">Investigating</option>
+											<option value="identified">Identified</option>
+											<option value="monitoring">Monitoring</option>
+											<option value="resolved">Resolved</option>
+										</select>
+									</div>
+									<div class="filter-group">
+										<select class="form-select filter-select" id="filter-incident-severity">
+											<option value="">All Severities</option>
+											<option value="minor">Minor</option>
+											<option value="major">Major</option>
+											<option value="critical">Critical</option>
+										</select>
+									</div>
+								</div>
+							</div>
+							<div id="incidents-list"></div>
+						</div>
+
+						<!-- MAINTENANCES TAB -->
+						<div class="admin-tab-panel" id="panel-maintenances">
+							<div class="toolbar">
+								<div class="toolbar-group">
+									<button class="btn btn-primary" id="btn-new-maintenance">
+										<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<circle cx="12" cy="12" r="10" />
+											<line x1="12" y1="8" x2="12" y2="16" />
+											<line x1="8" y1="12" x2="16" y2="12" />
+										</svg>
+										Schedule Maintenance
+									</button>
+									<button class="btn btn-secondary" id="btn-refresh-maintenances">
+										<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<polyline points="23 4 23 10 17 10" />
+											<polyline points="1 20 1 14 7 14" />
+											<path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+										</svg>
+										Refresh
+									</button>
+								</div>
+								<div class="toolbar-group">
+									<div class="filter-group">
+										<select class="form-select filter-select" id="filter-maint-status">
+											<option value="">All Statuses</option>
+											<option value="scheduled">Scheduled</option>
+											<option value="in_progress">In Progress</option>
+											<option value="completed">Completed</option>
+											<option value="cancelled">Cancelled</option>
+										</select>
+									</div>
+								</div>
+							</div>
+							<div id="maintenances-list"></div>
+						</div>
 					</div>
 				</div>
 			</section>
@@ -291,6 +359,8 @@
 			</div>
 		</footer>
 
+		<!-- INCIDENT MODALS -->
+
 		<!-- Create / Edit Incident Modal -->
 		<div class="modal-overlay" id="incidentModal">
 			<div class="modal modal-wide">
@@ -301,9 +371,9 @@
 							<line x1="12" y1="9" x2="12" y2="13" />
 							<line x1="12" y1="17" x2="12.01" y2="17" />
 						</svg>
-						<span id="modal-title">New Incident</span>
+						<span id="inc-modal-title">New Incident</span>
 					</h3>
-					<button class="btn-icon" id="btn-close-modal" aria-label="Close">
+					<button class="btn-icon" id="btn-close-inc-modal" aria-label="Close">
 						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 							<path d="M18 6L6 18M6 6l12 12" />
 						</svg>
@@ -338,7 +408,13 @@
 							<input type="text" class="form-input" id="incident-monitors" placeholder="Comma-separated IDs" />
 							<span class="form-hint">Optional: monitor/group IDs on this status page</span>
 						</div>
-						<div class="form-group full-width" id="initial-message-group">
+						<div class="form-group full-width">
+							<label class="form-check">
+								<input type="checkbox" id="incident-suppress" checked />
+								<span class="form-check-label">Suppress notifications for affected monitors during an active incident</span>
+							</label>
+						</div>
+						<div class="form-group full-width" id="inc-initial-message-group">
 							<label class="form-label">Initial Message <span class="required">*</span></label>
 							<textarea class="form-textarea" id="incident-message" rows="3" placeholder="We are investigating reports of..."></textarea>
 							<span class="form-hint">This will be the first timeline update entry</span>
@@ -346,7 +422,7 @@
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button class="btn btn-secondary" id="btn-cancel-modal">Cancel</button>
+					<button class="btn btn-secondary" id="btn-cancel-inc-modal">Cancel</button>
 					<button class="btn btn-primary" id="btn-save-incident">
 						<span>Create Incident</span>
 					</button>
@@ -354,8 +430,8 @@
 			</div>
 		</div>
 
-		<!-- Add Timeline Update Modal -->
-		<div class="modal-overlay" id="updateModal">
+		<!-- Add Incident Timeline Update Modal -->
+		<div class="modal-overlay" id="incidentUpdateModal">
 			<div class="modal">
 				<div class="modal-header">
 					<h3>
@@ -365,17 +441,17 @@
 						</svg>
 						Add Timeline Update
 					</h3>
-					<button class="btn-icon" id="btn-close-update-modal" aria-label="Close">
+					<button class="btn-icon" id="btn-close-inc-update-modal" aria-label="Close">
 						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 							<path d="M18 6L6 18M6 6l12 12" />
 						</svg>
 					</button>
 				</div>
 				<div class="modal-body">
-					<input type="hidden" id="update-incident-id" />
+					<input type="hidden" id="inc-update-incident-id" />
 					<div class="form-group">
 						<label class="form-label">New Status <span class="required">*</span></label>
-						<select class="form-select" id="update-status">
+						<select class="form-select" id="inc-update-status">
 							<option value="investigating">Investigating</option>
 							<option value="identified">Identified</option>
 							<option value="monitoring">Monitoring</option>
@@ -384,17 +460,132 @@
 					</div>
 					<div class="form-group">
 						<label class="form-label">Message <span class="required">*</span></label>
-						<textarea class="form-textarea" id="update-message" rows="3" placeholder="Describe the update..."></textarea>
+						<textarea class="form-textarea" id="inc-update-message" rows="3" placeholder="Describe the update..."></textarea>
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button class="btn btn-secondary" id="btn-cancel-update-modal">Cancel</button>
-					<button class="btn btn-primary" id="btn-save-update">
+					<button class="btn btn-secondary" id="btn-cancel-inc-update-modal">Cancel</button>
+					<button class="btn btn-primary" id="btn-save-inc-update">
 						<span>Add Update</span>
 					</button>
 				</div>
 			</div>
 		</div>
+
+		<!-- MAINTENANCE MODALS -->
+
+		<!-- Create / Edit Maintenance Modal -->
+		<div class="modal-overlay" id="maintenanceModal">
+			<div class="modal modal-wide">
+				<div class="modal-header">
+					<h3>
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path
+								d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"
+							/>
+						</svg>
+						<span id="maint-modal-title">Schedule Maintenance</span>
+					</h3>
+					<button class="btn-icon" id="btn-close-maint-modal" aria-label="Close">
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M18 6L6 18M6 6l12 12" />
+						</svg>
+					</button>
+				</div>
+				<div class="modal-body">
+					<input type="hidden" id="edit-maintenance-id" />
+					<div class="form-grid">
+						<div class="form-group full-width">
+							<label class="form-label">Title <span class="required">*</span></label>
+							<input type="text" class="form-input" id="maint-title" placeholder="Scheduled database migration" />
+						</div>
+						<div class="form-group" id="maint-status-group">
+							<label class="form-label">Status <span class="required">*</span></label>
+							<select class="form-select" id="maint-status">
+								<option value="scheduled">Scheduled</option>
+								<option value="in_progress">In Progress</option>
+								<option value="completed">Completed</option>
+								<option value="cancelled">Cancelled</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label class="form-label">Scheduled Start <span class="required">*</span></label>
+							<input type="datetime-local" class="form-input" id="maint-scheduled-start" />
+						</div>
+						<div class="form-group">
+							<label class="form-label">Scheduled End <span class="required">*</span></label>
+							<input type="datetime-local" class="form-input" id="maint-scheduled-end" />
+						</div>
+						<div class="form-group full-width">
+							<label class="form-label">Affected Monitors</label>
+							<input type="text" class="form-input" id="maint-monitors" placeholder="Comma-separated IDs" />
+							<span class="form-hint">Optional: monitor/group IDs on this status page</span>
+						</div>
+						<div class="form-group full-width">
+							<label class="form-check">
+								<input type="checkbox" id="maint-suppress" checked />
+								<span class="form-check-label">Suppress notifications for affected monitors during maintenance</span>
+							</label>
+						</div>
+						<div class="form-group full-width" id="maint-initial-message-group">
+							<label class="form-label">Initial Message <span class="required">*</span></label>
+							<textarea class="form-textarea" id="maint-message" rows="3" placeholder="Scheduled maintenance for..."></textarea>
+							<span class="form-hint">This will be the first timeline update entry</span>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" id="btn-cancel-maint-modal">Cancel</button>
+					<button class="btn btn-primary" id="btn-save-maintenance">
+						<span>Schedule Maintenance</span>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Add Maintenance Timeline Update Modal -->
+		<div class="modal-overlay" id="maintenanceUpdateModal">
+			<div class="modal">
+				<div class="modal-header">
+					<h3>
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<circle cx="12" cy="12" r="10" />
+							<polyline points="12 6 12 12 16 14" />
+						</svg>
+						Add Timeline Update
+					</h3>
+					<button class="btn-icon" id="btn-close-maint-update-modal" aria-label="Close">
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M18 6L6 18M6 6l12 12" />
+						</svg>
+					</button>
+				</div>
+				<div class="modal-body">
+					<input type="hidden" id="maint-update-id" />
+					<div class="form-group">
+						<label class="form-label">New Status <span class="required">*</span></label>
+						<select class="form-select" id="maint-update-status">
+							<option value="scheduled">Scheduled</option>
+							<option value="in_progress">In Progress</option>
+							<option value="completed">Completed</option>
+							<option value="cancelled">Cancelled</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label class="form-label">Message <span class="required">*</span></label>
+						<textarea class="form-textarea" id="maint-update-message" rows="3" placeholder="Describe the update..."></textarea>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" id="btn-cancel-maint-update-modal">Cancel</button>
+					<button class="btn btn-primary" id="btn-save-maint-update">
+						<span>Add Update</span>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- SHARED MODALS -->
 
 		<!-- Confirm Delete Modal -->
 		<div class="modal-overlay" id="confirmModal">
@@ -428,6 +619,6 @@
 		<!-- Toast -->
 		<div class="toast" id="toast"></div>
 
-		<script src="incidents.js"></script>
+		<script src="admin.js"></script>
 	</body>
 </html>
