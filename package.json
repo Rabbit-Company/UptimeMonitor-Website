@@ -1,7 +1,7 @@
 {
 	"name": "uptimemonitor-website",
 	"module": "src/index.js",
-	"version": "0.6.0",
+	"version": "0.6.1",
 	"type": "module",
 	"private": true,
 	"scripts": {
@@ -15,8 +15,8 @@
 	},
 	"dependencies": {
 		"@rabbit-company/password-generator": "^2.2.0",
-		"cytoscape": "^3.33.1",
-		"cytoscape-dagre": "^2.5.0",
-		"smol-toml": "^1.6.0"
+		"cytoscape": "^3.33.3",
+		"cytoscape-dagre": "^3.0.0",
+		"smol-toml": "^1.6.1"
 	}
 }

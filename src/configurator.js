@@ -613,6 +613,7 @@ function renderMonitorCard(m, idx) {
 		"postgresql",
 		"redis",
 		"snmp",
+		"dns",
 		"minecraft-java",
 		"minecraft-bedrock",
 	];
@@ -794,6 +795,22 @@ function renderPulseFields(idx, pulse) {
 			{ key: "url", label: "URL", type: "text", val: p.url },
 			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout || 3 },
 		],
+		dns: [
+			{ key: "host", label: "Host", type: "text", val: p.host },
+			{ key: "port", label: "Port", type: "number", val: p.port || 53 },
+			{ key: "query", label: "Query", type: "text", val: p.query, full: true },
+			{
+				key: "recordType",
+				label: "Record Type",
+				type: "select",
+				options: ["A", "AAAA", "CAA", "CNAME", "MX", "NS", "PTR", "SOA", "SRV", "TXT", "ANY"],
+				val: p.recordType || "A",
+			},
+			{ key: "protocol", label: "Protocol", type: "select", options: ["udp", "tcp"], val: p.protocol || "udp" },
+			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout || 3 },
+			{ key: "requireAnswer", label: "Require Answer", type: "check", val: p.requireAnswer !== false },
+			{ key: "expectedValue", label: "Expected Value (substring)", type: "text", val: p.expectedValue, full: true },
+		],
 		"minecraft-java": [
 			{ key: "host", label: "Host", type: "text", val: p.host },
 			{ key: "port", label: "Port", type: "number", val: p.port || 25565 },
@@ -822,6 +839,14 @@ ${fieldSet
 	<select class="form-select" data-bind="${bindPath}">
 		${f.options.map((o) => `<option value="${o}" ${f.val === o ? "selected" : ""}>${o}</option>`).join("")}
 	</select>
+</div>`;
+		}
+		if (f.type === "check") {
+			return `<div class="form-group${fullClass}">
+    <label class="form-check">
+        <input type="checkbox" ${f.val ? "checked" : ""} data-bind="${bindPath}" data-type="boolean" />
+        <span class="form-check-label">${f.label}</span>
+    </label>
 </div>`;
 		}
 		return `<div class="form-group${fullClass}">
