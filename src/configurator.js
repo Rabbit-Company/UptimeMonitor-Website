@@ -701,7 +701,7 @@ ${[1, 2, 3]
 	</div>
 	<div class="form-group">
 		<label class="form-label">Unit</label>
-		<input class="form-input" type="text" value="${esc(cm.unit || "")}" data-bind="monitors.${idx}.custom${n}.unit" data-ensure="monitors.${idx}.custom${n}" placeholder="e.g. MB, %, conn" />
+		<input class="form-input" type="text" value="${esc(cm.unit || "")}" data-bind="monitors.${idx}.custom${n}.unit" data-ensure="monitors.${idx}.custom${n}" data-empty-undefined placeholder="e.g. MB, %, conn" />
 	</div>
 </div>`;
 	})
@@ -1734,6 +1734,10 @@ function pruneEmptyCustomMetrics(cfg) {
 			if (!cm.id || String(cm.id).trim() === "") {
 				delete m[key];
 				continue;
+			}
+
+			if (cm.unit !== undefined && String(cm.unit).trim() === "") {
+				delete cm.unit;
 			}
 		}
 	}
