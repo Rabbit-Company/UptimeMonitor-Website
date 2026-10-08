@@ -212,12 +212,23 @@
 										<option value="azure">azure</option>
 										<option value="vercel">vercel</option>
 										<option value="nginx">nginx</option>
+										<option value="burrowgate">burrowgate</option>
 										<option value="development">development</option>
 									</select>
 								</div>
 								<div class="form-group">
 									<label class="form-label">Reload Token</label>
 									<input class="form-input mono" type="text" id="srv-reloadToken" placeholder="Auto-generated if empty" />
+								</div>
+								<div class="form-group">
+									<label class="form-label">BurrowGate Origin Secret</label>
+									<input class="form-input mono" type="text" id="srv-burrowgate-originSecret" placeholder="Disabled if empty" />
+									<span class="form-hint">Rejects requests that did not pass through BurrowGate. Proxy Preset is ignored when set.</span>
+								</div>
+								<div class="form-group">
+									<label class="form-label">BurrowGate Max Age (seconds)</label>
+									<input class="form-input" type="number" id="srv-burrowgate-maxAgeSeconds" placeholder="60" min="0" />
+									<span class="form-hint">Maximum age of the signed request timestamp. 0 disables the check.</span>
 								</div>
 							</div>
 						</div>

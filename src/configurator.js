@@ -272,6 +272,8 @@ function loadConfigToUI() {
 	document.getElementById("srv-port").value = config.server?.port || "";
 	document.getElementById("srv-proxy").value = config.server?.proxy || "";
 	document.getElementById("srv-reloadToken").value = config.server?.reloadToken || "";
+	document.getElementById("srv-burrowgate-originSecret").value = config.server?.burrowgate?.originSecret || "";
+	document.getElementById("srv-burrowgate-maxAgeSeconds").value = config.server?.burrowgate?.maxAgeSeconds ?? "";
 	document.getElementById("log-level").value = config.logger?.level ?? "3";
 
 	// Loki transport
@@ -334,9 +336,16 @@ function readGeneralFromUI() {
 		reloadToken: reloadToken || token(),
 	};
 
+	const burrowgateSecret = document.getElementById("srv-burrowgate-originSecret").value.trim();
+	const burrowgateMaxAge = document.getElementById("srv-burrowgate-maxAgeSeconds").value;
+	if (burrowgateSecret) {
+		config.server.burrowgate = { originSecret: burrowgateSecret };
+		if (burrowgateMaxAge !== "") config.server.burrowgate.maxAgeSeconds = Number(burrowgateMaxAge);
+	}
+
 	const logLevel = document.getElementById("log-level").value;
 	config.logger = {
-		level: Number(logLevel) || 3,
+		level: logLevel === "" ? 3 : Number(logLevel),
 	};
 
 	// Loki transport
