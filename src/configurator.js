@@ -625,6 +625,7 @@ function renderMonitorCard(m, idx) {
 		"dns",
 		"minecraft-java",
 		"minecraft-bedrock",
+		"gamedig",
 	];
 	const currentProtocol = m.pulse ? Object.keys(m.pulse)[0] || "" : "";
 
@@ -830,6 +831,29 @@ function renderPulseFields(idx, pulse) {
 			{ key: "port", label: "Port", type: "number", val: p.port || 19132 },
 			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout || 3 },
 		],
+		gamedig: [
+			{
+				key: "game",
+				label: "Game ID",
+				type: "text",
+				val: p.game,
+				emptyUndefined: true,
+				placeholder: "e.g. valheim, rust, minecraftjava",
+				hint: "GameDig game ID. Leave empty when using a generic protocol.",
+			},
+			{
+				key: "protocol",
+				label: "Generic Protocol",
+				type: "select",
+				options: ["", "valve", "gamespy1", "gamespy2", "gamespy3", "quake1", "quake2", "quake3", "unreal2"],
+				val: p.protocol || "",
+				emptyUndefined: true,
+				hint: "For games without an ID. Requires a port.",
+			},
+			{ key: "host", label: "Host", type: "text", val: p.host },
+			{ key: "port", label: "Query Port", type: "number", val: p.port, emptyUndefined: true, placeholder: "Game default" },
+			{ key: "timeout", label: "Timeout (s)", type: "number", val: p.timeout || 5 },
+		],
 	};
 
 	if (proto === "snmp") {
@@ -842,12 +866,14 @@ ${fieldSet
 	.map((f) => {
 		const fullClass = f.full ? " full-width" : "";
 		const bindPath = `monitors.${idx}.pulse.${proto}.${f.key}`;
+		const emptyAttr = f.emptyUndefined ? " data-empty-undefined" : "";
+		const hint = f.hint ? `\n\t<span class="form-hint">${f.hint}</span>` : "";
 		if (f.type === "select") {
 			return `<div class="form-group${fullClass}">
 	<label class="form-label">${f.label}</label>
-	<select class="form-select" data-bind="${bindPath}">
-		${f.options.map((o) => `<option value="${o}" ${f.val === o ? "selected" : ""}>${o}</option>`).join("")}
-	</select>
+	<select class="form-select" data-bind="${bindPath}"${emptyAttr}>
+		${f.options.map((o) => `<option value="${o}" ${f.val === o ? "selected" : ""}>${o || "None"}</option>`).join("")}
+	</select>${hint}
 </div>`;
 		}
 		if (f.type === "check") {
@@ -861,7 +887,7 @@ ${fieldSet
 		return `<div class="form-group${fullClass}">
 <label class="form-label">${f.label}</label>
 <input class="form-input${f.type === "text" ? " mono" : ""}" type="${f.type}" value="${esc(f.val ?? "")}"
-	data-bind="${bindPath}" ${f.type === "number" ? 'data-type="number"' : ""} />
+	data-bind="${bindPath}" ${f.type === "number" ? 'data-type="number"' : ""}${emptyAttr}${f.placeholder ? ` placeholder="${f.placeholder}"` : ""} />${hint}
 </div>`;
 	})
 	.join("")}
